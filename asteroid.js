@@ -45,6 +45,9 @@
   
   Asteroid.prototype.draw = function(ctx) {
     ctx.fillStyle = this.color;
+    ctx.strokeStyle = '#f00';
+    ctx.lineWidth = 1;
+    ctx.lineColor = 'black';
     ctx.beginPath();
 
     ctx.arc(
@@ -58,21 +61,5 @@
   
     ctx.fill();
   };
-    
-  Asteroid.prototype.spawn = function() {
-    var babies = [];
-    if (this.radius > 15){
-      for (var i = 0; i < 3; i++){
-        babies.push(this.randomAsteroid(this.pos[0], this.pos[1], 9))
-      }
-      return babies;
-    }
-    if (this.radius > 8) {
-      for (var i = 0; i < 4; i++){
-        babies.push(this.randomAsteroid(this.pos[0], this.pos[1], 3))
-      }
-      return babies;
-    }
-  }  
   
 })(this);

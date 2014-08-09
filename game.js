@@ -3,6 +3,7 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});
   
   var Game = Asteroids.Game = function (ctx) {
+    //not actually fps, but milliseconds per game cycle
     this.FPS = 30;
     
     this.DIM_X = 900;
@@ -11,6 +12,7 @@
     this.picY = 900;
     this.ctx = ctx;
     this.scaleSize = 0.5;
+    this.scaleDir = 1;
     
     this.asteroids = [];
     this.enemies = [];
@@ -20,7 +22,11 @@
     this.addAsteroids(4);
     this.ship = new Asteroids.Ship([this.DIM_X / 2, this.DIM_Y / 2], [0, 0]);
     
-    
+    this.asteroidTimer = window.setInterval(function() {
+      if (game.asteroids.length < 30) {
+        game.addAsteroids(1);
+      }
+    }, 4000);
     
     var img = new Image();
     var game = this;
@@ -29,13 +35,27 @@
     this.img = img;
   };
   
+  Game.prototype.start = function() {
+    this.bindKeyHandlers();
+    var game = this;
+    this.timerId = window.setInterval(function() {game.step();}, game.FPS);
+  };
+  
+  Game.prototype.step = function() {
+    // this.turretTarget();
+    this.checkCollisions();
+    this.move();
+    this.draw();
+    this.ship.navigate();
+    this.scaleLoop();
+  };
+  
   Game.prototype.scale = function(){
-    //refactor into scalabes hash
+    //refactor into scalables hash
     var smallScale = (this.scaleSize+1)/2;
     this.ship.height = this.ship.startHeight / smallScale;
     this.ship.width = this.ship.startWidth / smallScale;
     this.ship.radius = this.ship.startRadius / smallScale;
-    
     this.asteroids.forEach( function(asteroid) {
       asteroid.radius = asteroid.startRadius / smallScale;
     });
@@ -47,6 +67,26 @@
       this.asteroids.push(Asteroids.Asteroid.prototype.randomAsteroid(this.DIM_X, this.DIM_Y, rad));
     }
   };
+  
+  Game.prototype.spawnBabies = function(asteroid) {
+    var babies = [];
+    if (asteroid.radius < 12) {
+      return babies;
+    }else if (asteroid.radius < 30){
+      for (var i = 0; i < 3; i++){
+        var velX = asteroid.vel[0] * Math.random()-.5;
+        var velY = asteroid.vel[1] * Math.random()-.5;
+        babies.push(new Asteroids.Asteroid([asteroid.pos[0], asteroid.pos[1]], [velX, velY], asteroid.radius/(Math.random()+1.5)));
+      }
+    }else{
+      for (var i = 0; i < 3; i++){
+        var velX = asteroid.vel[0] * Math.random()-.5;
+        var velY = asteroid.vel[1] * Math.random()-.5;
+        babies.push(new Asteroids.Asteroid([asteroid.pos[0], asteroid.pos[1]], [velX, velY], asteroid.radius/(Math.random()+1.5)));
+      }
+    }
+    return babies;
+  };  
   
   //BINDING
   
@@ -89,14 +129,10 @@
   };
   
   //GAME LOGIC
-  Game.prototype.step = function() {
-    this.turretTarget();
-    this.checkCollisions();
-    this.move();
-    this.draw();
-    this.ship.navigate();
-    this.scaleUp();
-  };
+  
+  Game.prototype.gameOver = function() {
+    clearInterval(this.timerId);
+  }
   
   Game.prototype.checkCollisions = function() {
     var gameInstance = this;
@@ -106,8 +142,7 @@
     this.asteroids.forEach(function(asteroid) {
 
       if (asteroid.isCollidedWith(gameInstance.ship)) {
-        alert("game over");
-        clearInterval(gameInstance.timerId);
+        gameInstance.gameOver();
       }
 
       gameInstance.bullets.forEach(function(bullet) {
@@ -133,9 +168,9 @@
 
     destroyAsteroids.forEach(function(asteroid) {
       var index = gameInstance.asteroids.indexOf(asteroid);
-      var newAsteroids = asteroid.spawn();
+      var newAsteroids = gameInstance.spawnBabies(asteroid);
       gameInstance.hits += 1;
-      gameInstance.asteroids.concat(newAsteroids);
+      gameInstance.asteroids = gameInstance.asteroids.concat(newAsteroids);
       gameInstance.asteroids.splice(index, 1);
     });
   };
@@ -173,13 +208,14 @@
       bullet.move(game.DIM_X, game.DIM_Y);
     });
   };
-   
-  Game.prototype.start = function() {
-    this.bindKeyHandlers();
-    var game = this;
-    this.timerId = window.setInterval(function() {game.step();}, game.FPS);
-  };
-
+  
+  Game.prototype.scaleLoop = function() {
+    if (this.scaleSize < 3){
+      this.scaleUp();
+    }
+    this.scale();
+  }
+  
   Game.prototype.scaleUp = function() {
     this.scaleSize += 0.001;
     this.scale();

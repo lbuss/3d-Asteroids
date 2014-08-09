@@ -14,7 +14,7 @@
     this.width = 33;
     this.startHeight = 33;
     this.startWidth = 33;
-    this.makeTurret(this);
+    // this.makeTurret(this);
   };
   
   Ship.inherits(Asteroids.MovingObject);
@@ -27,9 +27,20 @@
     if(key.isPressed("left")) this.heading -= turnSpeed;
   };
   
+  Ship.prototype.move = function (maxX, maxY) {
+      if (Math.abs(this.vel[0]) + Math.abs(this.vel[1]) > 5){
+        this.vel[0] *= .95;
+        this.vel[1] *= .95;
+      }
+      this.pos[0] += this.vel[0];
+      this.pos[1] += this.vel[1];
+      this.pos[0] = (this.pos[0] < 0 ? maxX : this.pos[0] % maxX);
+      this.pos[1] = (this.pos[1] < 0 ? maxY : this.pos[1] % maxY);
+  };
+  
   Ship.prototype.power = function(impulse) {
     this.vel[0] += impulse[0]/10;
-    this.vel[1] += impulse[1]/10; 
+    this.vel[1] += impulse[1]/10;
   };
   
   Ship.prototype.fireBullet = function() {
@@ -44,8 +55,9 @@
     if(key.isPressed("up")) {
       ctx.beginPath();
       var vec = headingVec(this.heading);
-      var xJet = this.pos[0] - this.width/2*vec[0]/20;
-      var yJet = this.pos[1] - this.height/2*vec[1]/20;
+      var xJet = this.pos[0] - this.width/2*vec[0]/10;
+      var yJet = this.pos[1] - this.height/2*vec[1]/10;
+      debugger
       var rad = this.height/3 + Math.random()*this.height/10;
       ctx.arc(xJet, yJet, rad, 0, 2 * Math.PI, false);
       ctx.fillStyle = 'yellow';
