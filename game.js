@@ -6,8 +6,8 @@
     //not actually fps, but milliseconds per game cycle
     this.FPS = 30;
     
-    this.DIM_X = 900;
-    this.DIM_Y = 750;
+    this.DIM_X = 800;
+    this.DIM_Y = 600;
     this.picX = 1600;
     this.picY = 900;
     this.ctx = ctx;
