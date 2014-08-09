@@ -8,3 +8,13 @@ canvas {
   margin-right: auto;
   display: block;
 }
+
+h2{
+  color: red;
+  text-align: center;
+}
+
+.scoreBox{
+  color: red;
+  text-align: center;
+}

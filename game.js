@@ -69,16 +69,11 @@
   };
   
   Game.prototype.spawnBabies = function(asteroid) {
+    var smallScale = (this.scaleSize+1)/2;
     var babies = [];
-    if (asteroid.radius < 12) {
+    if (asteroid.startRadius * smallScale < 12) {
       return babies;
-    }else if (asteroid.radius < 30){
-      for (var i = 0; i < 3; i++){
-        var velX = asteroid.vel[0] * Math.random()-.5;
-        var velY = asteroid.vel[1] * Math.random()-.5;
-        babies.push(new Asteroids.Asteroid([asteroid.pos[0], asteroid.pos[1]], [velX, velY], asteroid.radius/(Math.random()+1.5)));
-      }
-    }else{
+    }else {
       for (var i = 0; i < 3; i++){
         var velX = asteroid.vel[0] * Math.random()-.5;
         var velY = asteroid.vel[1] * Math.random()-.5;
@@ -144,7 +139,7 @@
       if(gameInstance.ship.bounced > 0){
         gameInstance.ship.bounced -= 1;
       }
-      
+
       if (asteroid.isCollidedWith(gameInstance.ship)) {
         if(gameInstance.ship.bounced === 0){
           gameInstance.ship.shipDie(asteroid.vel);
@@ -179,6 +174,7 @@
       gameInstance.hits += 1;
       gameInstance.asteroids = gameInstance.asteroids.concat(newAsteroids);
       gameInstance.asteroids.splice(index, 1);
+      $(".scoreBox").html("Asteroids Destroyed: "+gameInstance.hits);
     });
   };
   
