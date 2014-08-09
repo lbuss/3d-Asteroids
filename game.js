@@ -8,8 +8,8 @@
     
     this.DIM_X = 800;
     this.DIM_Y = 600;
-    this.picX = 1600;
-    this.picY = 900;
+    this.picX = 1920;
+    this.picY = 1200;
     this.ctx = ctx;
     this.scaleSize = 0.5;
     this.scaleDir = 1;
@@ -31,7 +31,7 @@
     var img = new Image();
     var game = this;
     //1600x900;
-    img.src = 'earth-explosion.jpg';
+    img.src = 'space.jpg';
     this.img = img;
   };
   
@@ -131,7 +131,8 @@
   //GAME LOGIC
   
   Game.prototype.gameOver = function() {
-    clearInterval(this.timerId);
+    key.unbind('space, up, left, right');
+    // clearInterval(this.timerId);
   }
   
   Game.prototype.checkCollisions = function() {
@@ -140,9 +141,15 @@
     var destroyAsteroids = [];
     
     this.asteroids.forEach(function(asteroid) {
-
+      if(gameInstance.ship.bounced > 0){
+        gameInstance.ship.bounced -= 1;
+      }
+      
       if (asteroid.isCollidedWith(gameInstance.ship)) {
-        gameInstance.gameOver();
+        if(gameInstance.ship.bounced === 0){
+          gameInstance.ship.shipDie(asteroid.vel);
+          gameInstance.gameOver();
+        }
       }
 
       gameInstance.bullets.forEach(function(bullet) {

@@ -14,6 +14,9 @@
     this.width = 33;
     this.startHeight = 33;
     this.startWidth = 33;
+    this.startRadius = 10;
+    this.dead = null;
+    this.bounced = 0;
     // this.makeTurret(this);
   };
   
@@ -22,13 +25,15 @@
   
   Ship.prototype.navigate = function() {
     var turnSpeed = 10;
-    if(key.isPressed("up")) this.power(headingVec(this.heading));  
-    if(key.isPressed("right")) this.heading += turnSpeed;
-    if(key.isPressed("left")) this.heading -= turnSpeed;
+    if(this.dead === null){
+      if(key.isPressed("up")) this.power(headingVec(this.heading));  
+      if(key.isPressed("right")) this.heading += turnSpeed;
+      if(key.isPressed("left")) this.heading -= turnSpeed;
+    }
   };
   
   Ship.prototype.move = function (maxX, maxY) {
-      if (Math.abs(this.vel[0]) + Math.abs(this.vel[1]) > 5){
+      if (Math.abs(this.vel[0]) + Math.abs(this.vel[1]) > 5 && !this.dead){
         this.vel[0] *= .95;
         this.vel[1] *= .95;
       }
@@ -51,13 +56,20 @@
     return new Asteroids.Bullet(bulletPos, bulletVel);
   };
   
+  Ship.prototype.shipDie = function(vel) {
+    this.vel[0] = vel[0]*(Math.random()+1);
+    this.vel[1] = vel[1]*(Math.random()+1);
+    this.rotation = Math.random()*24-12;
+    this.dead = 1;
+    this.bounced = 40;
+  }
+  
   Ship.prototype.draw = function(ctx, scale) {
-    if(key.isPressed("up")) {
+    if(key.isPressed("up") && !this.dead) {
       ctx.beginPath();
       var vec = headingVec(this.heading);
       var xJet = this.pos[0] - this.width/2*vec[0]/10;
       var yJet = this.pos[1] - this.height/2*vec[1]/10;
-      debugger
       var rad = this.height/3 + Math.random()*this.height/10;
       ctx.arc(xJet, yJet, rad, 0, 2 * Math.PI, false);
       ctx.fillStyle = 'yellow';
@@ -66,8 +78,12 @@
       // ctx.strokeStyle = 'yellow';
       ctx.stroke();
     }
-    
-    drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.heading+90, ctx);
+    if (!this.dead){
+      drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.heading+90, ctx);
+    }else{
+      drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.heading+90 + this.rotation * this.dead, ctx);
+      this.dead +=1;
+    }
     
     if (this.turret){
       this.turret.draw(ctx);
