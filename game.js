@@ -109,7 +109,7 @@
     this.renderer.setViewport( left, bottom, width, height );
     this.renderer.setScissor( left, bottom, width, height );
     this.renderer.enableScissorTest ( true );
-    this.camera.position.set(this.ship.object.position.x, 0, this.ship.object.position.z);
+    this.camera.position.set(this.ship.object.position.x, 10, this.ship.object.position.z);
     this.camera.rotation.y = this.ship.object.rotation.y -Math.PI/2;;
     
     this.renderer.render( this.scene, this.camera);
