@@ -4,20 +4,14 @@
   
   
   var Asteroid = Asteroids.Asteroid = function(pos, vel, radius, color) {
-    // this.COLOR = '#339900';
-    // this.RADIUS = 5;
+    this.mass = radius*radius;
+    var color = color || Math.random() * 0xffffff;
     var geometry = new THREE.SphereGeometry( radius, 10, 10 );
-    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: color } ) );
     this.object.position.x = pos[0];
     this.object.position.z = pos[1];
+    this.object.position.y = pos[2];
     Asteroids.MovingObject.call(this, pos, vel, radius, color);
-    
-    this.height = radius*2;
-    this.width = radius*2;
-    // this.startHeight = radius*2;
-    // this.startWidth = radius*2;
-    
-    // this.rotation = 360 * Math.random();
   };
   
   Asteroid.inherits(Asteroids.MovingObject);
@@ -50,48 +44,6 @@
     var velX = Math.floor((Math.random() - 0.5) * modX);
     var velY = Math.floor((Math.random() - 0.5) * modY);
     var that = this;
-    return new Asteroid([x, y], [velX, velY], radius);
+    return new Asteroid([x, y, 0], [0, 0, 0], radius);
   };
-  
-  Asteroid.prototype.draw = function(ctx) {
-    
-     
-    // drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.rotation, ctx);
-    // ctx.fillStyle = this.color;
-//     ctx.strokeStyle = '#f00';
-//     ctx.lineWidth = 1;
-//     ctx.lineColor = 'black';
-//     ctx.beginPath();
-//
-//     ctx.arc(
-//       this.pos[0],
-//       this.pos[1],
-//       this.radius,
-//       0,
-//       2 * Math.PI,
-//       false
-//     );
-//
-//     ctx.fill();
-  };
-  
-  // function drawImageRot(img,x,y,width,height,deg,ctx){
-//
-//         //Convert degrees to radian
-//         var rad = deg * Math.PI / 180;
-//
-//         //Set the origin to the center of the image
-//         ctx.translate(x + width / 2, y + height / 2);
-//
-//         //Rotate the canvas around the origin
-//         ctx.rotate(rad);
-//
-//         //draw the image
-//         ctx.drawImage(img,width / 2 * (-1),height / 2 * (-1),width,height);
-//
-//         //reset the canvas
-//         ctx.rotate(rad * ( -1 ) );
-//         ctx.translate((x + width / 2) * (-1), (y + height / 2) * (-1));
-//     }
-  
 })(this);

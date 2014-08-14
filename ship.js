@@ -10,19 +10,14 @@
     this.object.position.x = pos[0];
     this.object.position.z = pos[1];
     this.object.rotation.z = Math.PI/2;
-    
-    Asteroids.MovingObject.call(this, pos, vel, 3, '#FF0000');
+
     Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
-    this.heading = 0;
     
-    this.height = 33;
-    this.width = 33;
-    this.startHeight = 33;
-    this.startWidth = 33;
-    this.startRadius = 10;
+    //TODO: modify heading to 3d
+    this.heading = 0;
     this.dead = null;
     this.bounced = 0;
-    // this.makeTurret(this);
+    
   };
   
   Ship.inherits(Asteroids.MovingObject);
@@ -80,61 +75,6 @@
     this.rotation = Math.random()*24-12;
     this.dead = 1;
     this.bounced = 40;
-  }
-  
-  Ship.prototype.draw = function(ctx, scale) {
-    if(key.isPressed("up") && !this.dead) {
-      ctx.beginPath();
-      var vec = headingVec(this.heading);
-      var xJet = this.pos[0] - this.width/2*vec[0]/10;
-      var yJet = this.pos[1] - this.height/2*vec[1]/10;
-      var rad = this.height/3 + Math.random()*this.height/10;
-      ctx.arc(xJet, yJet, rad, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'yellow';
-      ctx.fill();
-      // ctx.lineWidth = 5;
-      // ctx.strokeStyle = 'yellow';
-      ctx.stroke();
-    }
-    if (!this.dead){
-      drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.heading+90, ctx);
-    }else{
-      drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.heading+90 + this.rotation * this.dead, ctx);
-      this.dead +=1;
-    }
-    
-    if (this.turret){
-      this.turret.draw(ctx);
-    };
   };
-  
-  Ship.prototype.makeTurret = function(ship){
-    ship.turret = new Asteroids.Turret(ship);
-  }
-  
-  var headingVec = function(heading){
-    var x = Math.cos(heading/180 * Math.PI) * 10;
-    var y = Math.sin(heading/180 * Math.PI) * 10;
-    return [x,y];
-  };
-  
-  function drawImageRot(img,x,y,width,height,deg,ctx){
 
-        //Convert degrees to radian 
-        var rad = deg * Math.PI / 180;
-
-        //Set the origin to the center of the image
-        ctx.translate(x + width / 2, y + height / 2);
-
-        //Rotate the canvas around the origin
-        ctx.rotate(rad);
-
-        //draw the image    
-        ctx.drawImage(img,width / 2 * (-1),height / 2 * (-1),width,height);
-
-        //reset the canvas  
-        ctx.rotate(rad * ( -1 ) );
-        ctx.translate((x + width / 2) * (-1), (y + height / 2) * (-1));
-    }
-  
 })(this);
