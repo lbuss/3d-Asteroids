@@ -1,7 +1,9 @@
 <html>
 <header>
+  <script src="three.min.js"></script>
   <script src="keymaster.js"></script>
   <script src="inherits.js"></script>
+  <script src="utils.js"></script>
   <script src="moving_object.js"></script>
   <script src="turret.js"></script>
   <script src="asteroid.js"></script>
@@ -14,15 +16,12 @@
 </header>
 
 <body>
-  <br>
-  <h2>Space Death Simulator</h2>
-  <br>
-  <canvas width='800' height='600'></canvas>
+  <div id="container">
+  </div>
   <br>
   <h4 class="scoreBox"></h4>
   <script>
-    var canvas = document.getElementsByTagName('canvas')[0];
-    var g = new Asteroids.Game(canvas.getContext('2d'));
+    var g = new Asteroids.Game();
     g.start();
   </script>
 </body>

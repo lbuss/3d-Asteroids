@@ -6,16 +6,18 @@
   var Asteroid = Asteroids.Asteroid = function(pos, vel, radius, color) {
     // this.COLOR = '#339900';
     // this.RADIUS = 5;
-    Asteroids.MovingObject.call(this, pos, vel, radius, '#505050');
-    var img = new Image();
-    img.src = 'ast.png';
-    this.img = img;
+    var geometry = new THREE.SphereGeometry( radius, 10, 10 );
+    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+    this.object.position.x = pos[0];
+    this.object.position.z = pos[1];
+    Asteroids.MovingObject.call(this, pos, vel, radius, color);
+    
     this.height = radius*2;
     this.width = radius*2;
-    this.startHeight = radius*2;
-    this.startWidth = radius*2;
+    // this.startHeight = radius*2;
+    // this.startWidth = radius*2;
     
-    this.rotation = 360 * Math.random();
+    // this.rotation = 360 * Math.random();
   };
   
   Asteroid.inherits(Asteroids.MovingObject);
@@ -40,21 +42,21 @@
       } else {
         x = 0;
       }
-    } 
-    var SPEED_MODIFIER = 40;
+    }
+    var SPEED_MODIFIER = 80;
     var modX = (dimX / SPEED_MODIFIER);
     var modY = (dimY / SPEED_MODIFIER);
 
     var velX = Math.floor((Math.random() - 0.5) * modX);
     var velY = Math.floor((Math.random() - 0.5) * modY);
-
     var that = this;
     return new Asteroid([x, y], [velX, velY], radius);
   };
   
   Asteroid.prototype.draw = function(ctx) {
     
-    drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.rotation, ctx);
+     
+    // drawImageRot(this.img, this.pos[0]-this.width/2, this.pos[1]-this.height/2, this.width, this.height, this.rotation, ctx);
     // ctx.fillStyle = this.color;
 //     ctx.strokeStyle = '#f00';
 //     ctx.lineWidth = 1;
@@ -73,23 +75,23 @@
 //     ctx.fill();
   };
   
-  function drawImageRot(img,x,y,width,height,deg,ctx){
-
-        //Convert degrees to radian 
-        var rad = deg * Math.PI / 180;
-
-        //Set the origin to the center of the image
-        ctx.translate(x + width / 2, y + height / 2);
-
-        //Rotate the canvas around the origin
-        ctx.rotate(rad);
-
-        //draw the image    
-        ctx.drawImage(img,width / 2 * (-1),height / 2 * (-1),width,height);
-
-        //reset the canvas  
-        ctx.rotate(rad * ( -1 ) );
-        ctx.translate((x + width / 2) * (-1), (y + height / 2) * (-1));
-    }
+  // function drawImageRot(img,x,y,width,height,deg,ctx){
+//
+//         //Convert degrees to radian
+//         var rad = deg * Math.PI / 180;
+//
+//         //Set the origin to the center of the image
+//         ctx.translate(x + width / 2, y + height / 2);
+//
+//         //Rotate the canvas around the origin
+//         ctx.rotate(rad);
+//
+//         //draw the image
+//         ctx.drawImage(img,width / 2 * (-1),height / 2 * (-1),width,height);
+//
+//         //reset the canvas
+//         ctx.rotate(rad * ( -1 ) );
+//         ctx.translate((x + width / 2) * (-1), (y + height / 2) * (-1));
+//     }
   
 })(this);

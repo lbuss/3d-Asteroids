@@ -4,12 +4,17 @@
   
   
   var Ship = Asteroids.Ship = function(pos, vel) {
-    Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
-    this.heading = -90;
     
-    var img = new Image();
-    img.src = 'ship.png';
-    this.img = img;
+    var geometry = new THREE.CylinderGeometry( 7, 0, 15, 32 );
+    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: '#949494' } ) );
+    this.object.position.x = pos[0];
+    this.object.position.z = pos[1];
+    this.object.rotation.z = Math.PI/2;
+    
+    Asteroids.MovingObject.call(this, pos, vel, 3, '#FF0000');
+    Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
+    this.heading = 0;
+    
     this.height = 33;
     this.width = 33;
     this.startHeight = 33;
@@ -27,8 +32,8 @@
     var turnSpeed = 10;
     if(this.dead === null){
       if(key.isPressed("up")) this.power(headingVec(this.heading));  
-      if(key.isPressed("right")) this.heading += turnSpeed;
-      if(key.isPressed("left")) this.heading -= turnSpeed;
+      if(key.isPressed("right")) this.heading -= turnSpeed;
+      if(key.isPressed("left")) this.heading += turnSpeed;
     }
   };
   
@@ -39,8 +44,21 @@
       }
       this.pos[0] += this.vel[0];
       this.pos[1] += this.vel[1];
-      this.pos[0] = (this.pos[0] < 0 ? maxX : this.pos[0] % maxX);
-      this.pos[1] = (this.pos[1] < 0 ? maxY : this.pos[1] % maxY);
+      
+      this.object.rotation.y = (this.heading)/360 * 2 * Math.PI;
+      
+      this.object.position.x += this.vel[0];
+      this.object.position.z -= this.vel[1];
+      
+      if (this.object.position.x < -maxX){
+        this.object.position.x = maxX
+      }if (this.object.position.x > maxX){
+        this.object.position.x = -maxX
+      }if (this.object.position.z < -maxY){
+        this.object.position.z = maxY
+      }if (this.object.position.z > maxY){
+        this.object.position.z = -maxY
+      }
   };
   
   Ship.prototype.power = function(impulse) {
@@ -51,8 +69,8 @@
   Ship.prototype.fireBullet = function() {
     var bulletSpeed = 1;
     var bulletVel = [headingVec(this.heading)[0]*bulletSpeed,
-                     headingVec(this.heading)[1]*bulletSpeed];
-    var bulletPos = [this.pos[0], this.pos[1]];
+                     -headingVec(this.heading)[1]*bulletSpeed];
+    var bulletPos = [this.object.position.x, this.object.position.z];
     return new Asteroids.Bullet(bulletPos, bulletVel);
   };
   
