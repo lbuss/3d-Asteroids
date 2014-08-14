@@ -43,6 +43,7 @@ var light = new THREE.DirectionalLight( 0xffffff, .5 );
     this.camera2.position.set(0, 700, 0);
     this.camera2.rotation.y = Math.PI/2;
     
+    controls = new THREE.OrbitControls( this.camera2 );
     var game = this;
     // this.asteroidTimer = window.setInterval(function() {
 //       if (game.asteroids.length < 30) {

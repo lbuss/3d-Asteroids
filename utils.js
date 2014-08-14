@@ -13,16 +13,19 @@ var headingVec = function(heading){
 };
 
 var pointDistance = function(p1, p2){
-  return Math.sqrt(Math.pow(p1[0]-p2[0], 2) + Math.pow(p1[1]-p2[1], 2) + Math.pow(p1[2]-p2[2], 2));
+  var d1 = p1[0]-p2[0];
+  var d2 = p1[1]-p2[1];
+  var d3 = p1[2]-p2[2];
+  return Math.sqrt(Math.pow(d1, 2) + Math.pow(d2, 2) + Math.pow(d3, 2));
 };
 
 var gravityVector = function(obj, obj2) {
   var pos1 = [obj.object.position.x, obj.object.position.z, obj.object.position.y];
   var pos2 = [obj2.object.position.x, obj2.object.position.z, obj2.object.position.y];
   var dist = pointDistance(pos1, pos2);
-//divide by magic scaling factor since gravity is applied every frame rather //than seconds
-  var mag = (obj.mass * obj2.mass)/ Math.pow(dist, 2)/100;
+//divide by magic scaling factor since gravity is applied every frame rather //than seconds. Also not true gravity, this scaling is much easier to create a //stable system with
+  var mag = (obj.mass + obj2.mass)/ dist/500;
   var unitVec = [ Math.floor(pos1[0]-pos2[0])/dist, Math.floor(pos1[1]-pos2[1])/dist, Math.floor(pos1[2]-pos2[2])/dist ];
   
-  return [unitVec[0]*mag, unitVec[1]*mag, unitVec[2]*mag];
+  return [-unitVec[0]*mag, -unitVec[1]*mag, -unitVec[2]*mag];
 }
