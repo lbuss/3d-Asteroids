@@ -25,6 +25,13 @@ var pointDistance = function(p1, p2){
   return Math.sqrt(Math.pow(d1, 2) + Math.pow(d2, 2) + Math.pow(d3, 2));
 };
 
+var pointDistanceHash = function(p1, p2){
+  var d1 = p1['x']-p2['x'];
+  var d2 = p1['y']-p2['y'];
+  var d3 = p1['z']-p2['z'];
+  return Math.sqrt(Math.pow(d1, 2) + Math.pow(d2, 2) + Math.pow(d3, 2));
+};
+
 var gravityVector = function(obj, obj2) {
   var pos1 = [obj.object.position.x, obj.object.position.z, obj.object.position.y];
   var pos2 = [obj2.object.position.x, obj2.object.position.z, obj2.object.position.y];

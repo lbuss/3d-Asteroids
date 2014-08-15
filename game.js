@@ -3,25 +3,16 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});
   
   var Game = Asteroids.Game = function () {
-    this.DIM_X = 1200;
-    this.DIM_Y = 600;
-    this.boundX = this.DIM_X/2*.8;
-    this.boundY = this.DIM_Y*.8;
+
     this.scene = new THREE.Scene();
     this.mouse = new THREE.Vector2();
     this.intersects = [];
     this.animId = null;
-   
-    //
-    //     var light = new THREE.DirectionalLight( 0xffffff );
-    //     light.position.set( -1, -1, -1 ).normalize();
-    //     this.scene.add( light );
     
     this.projector = new THREE.Projector();
-    raycaster = new THREE.Raycaster();
+    this.raycaster = new THREE.Raycaster();
 
     this.renderer = new THREE.WebGLRenderer();
-    
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     this.renderer.sortObjects = false;
     
@@ -32,6 +23,7 @@
     this.bullets = [];
     this.hits = 0;
     
+    this.view = 0;
     this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
     this.camera.position.set(-700, 700, 700);
 
@@ -49,29 +41,24 @@
     this.createPlanets();
     this.createShip();
     this.bindKeyHandlers();
-    var game = this;
     this.animate();
-    // this.timerId = window.setInterval(function() {game.step();}, game.FPS);
   };
   
   Game.prototype.createShip = function(){ 
     var object = this.addAsteroid();
     
-    this.ship = new Asteroids.Ship({pos: [400, 0, 0], vel: [0, 5, 0]});
+    this.ship = new Asteroids.Ship({pos: [700, 0, 0], vel: [0, 5, 0]});
     this.ship.text = 'Super 3d asteroids';
     this.ship.description = 'Take on the asteroids!';
-    this.ship.divName = 6;
+    this.ship.divName = 'ship';
     
     var game = this;
-    $('#linksWrap').append("<br><a id="+this.ship.divName+">"+this.ship.text+"</a><br>");
-    $("#"+this.ship.divName).hover(function(){game.mark(this.ship); game.createInfo(this.ship)}, function(){game.unmark(this.ship)});
+    $('#linksWrap').append("<br><a href='' id='ship'>"+this.ship.text+"</a><br>");
+    $('#ship').hover(function(){game.mark(game.ship); game.createInfo(game.ship)}, function(){game.unmark(game.ship)});
     
     this.scene.add( this.ship.object );
     
-    // this.ship = new Asteroids.Ship([0, 0], [0, 0]);
-    //     this.scene.add( this.ship.object );
-    //
-    //     this.camera = new THREE.PerspectiveCamera( 70, this.DIM_X/2/this.DIM_Y, 1, 10000 );
+    
     //     this.camera.position.set(this.ship.object.position.x, 0, this.ship.object.position.z);
     //     this.camera.rotation.y = this.ship.object.rotation.y-Math.PI/2;
   }
@@ -85,10 +72,7 @@
     "ChatApp is a simple javascript chat client handled by server-side PHP",
     "It's my resume"
     ];   
-      
-    var angle = (2*Math.PI) / linkName.length;
-    this.cones = [];
-  
+
     var game = this;
     for ( var i = 0; i < linkName.length; i ++ ) {
       (function(){
@@ -103,6 +87,7 @@
         $("#"+object.divName).hover(function(){game.mark(object); game.createInfo(object)}, function(){game.unmark(object)});
         
         game.scene.add( object.object );
+        game.asteroids.push(object);
       })();
     }
   }
@@ -119,48 +104,34 @@
   }
   
   Game.prototype.animate = function() {
-    // this.checkCollisions();
+    this.checkCollisions();
     this.move();
-    
     if(!this.stopAnimating){
-    this.animId = requestAnimationFrame( this.animate.bind(this) );
+      this.animId = requestAnimationFrame( this.animate.bind(this) );
     }else{
-    cancelAnimationFrame( this.animId );
+      cancelAnimationFrame( this.animId );
     }
     this.render();
-    // this.ship.navigate();
+    this.ship.navigate();
   }
   
   Game.prototype.render = function() {
-    this.updateCamera();
+    if (this.view === 0){
+      this.updateCamera();
+    }else{
+      this.updateCamera2();
+    }
+      
   }
   
-  // Game.prototype.updateCamera = function(){
-    //     var left = 0;
-    //     var bottom = 0;
-    //     var width = 0.5;
-    //     var height = 1;
-    //
-    //    var left   = Math.floor( this.DIM_X  * left );
-    //     var bottom = Math.floor( this.DIM_Y * bottom );
-    //     var width  = Math.floor( this.DIM_X  * width );
-    //     var height = Math.floor( this.DIM_Y * height );
-    //
-    //    this.renderer.setViewport( left, bottom, width, height );
-    //    this.renderer.setScissor( left, bottom, width, height );
-    //    this.renderer.enableScissorTest ( true );
-    //    this.camera.position.set(this.ship.object.position.x, 10, this.ship.object.position.z);
-    //    this.camera.rotation.y = this.ship.object.rotation.y -Math.PI/2;
-    //
-    //    this.renderer.render( this.scene, this.camera);
-    //    // var theta += 0.1;
-    //    // camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
-    //    // camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
-    //    //             camera.position.z = radius * Math.cos( THREE.Math.degToRad( theta ) );
-    //    // camera.position.x += ( mouse.x - camera.position.x ) * 0.05;
-    //    //             camera.position.y += ( - mouse.y - camera.position.y ) * 0.05;
-    //    // this.camera.lookAt( this.scene.position );
-    //  }
+  Game.prototype.updateCamera2 = function(){
+       this.camera.position.set(this.ship.object.position.x, 10, this.ship.object.position.z);
+       this.camera.rotation.y = this.ship.object.rotation.y- Math.PI/2;
+       this.camera.rotation.x = this.ship.object.rotation.x;
+       this.camera.rotation.z = this.ship.object.rotation.z- Math.PI/2;
+       
+       this.renderer.render( this.scene, this.camera);
+     }
   
     Game.prototype.updateCamera = function(){
       this.camera.lookAt( this.scene.position );
@@ -189,7 +160,8 @@
         for (var i = 0; i < 3; i++){
           var velX = asteroid.vel[0] * Math.random()-.5;
           var velY = asteroid.vel[1] * Math.random()-.5;
-          babies.push(new Asteroids.Asteroid([asteroid.object.position.x, asteroid.object.position.z], [velX, velY], asteroid.radius/(Math.random()+1.5)));
+          var velZ = asteroid.vel[2] * Math.random()-.5;
+          babies.push(new Asteroids.Asteroid({pos:[asteroid.object.position.x, asteroid.object.position.z, asteroid.object.position.y], vel: [velX, velY, velZ], radius: asteroid.object.radius/(Math.random()+1.5)}));
         }
       }
       return babies;
@@ -214,7 +186,14 @@
             game.addAsteroids(1);
           }
         }, 400);
-
+      });
+      
+      key('f', function() {
+        switch(game.view){
+          case 0: game.view = 1; $('.infoWrap').hide(); break;
+          
+          case 1: game.view = 0; $('.infoWrap').show(); game.camera.position.set(-700, 700, 700); break;
+        }
       });
 
     };
@@ -224,30 +203,30 @@
       this.asteroids.forEach(function(asteroid) {
         asteroid.move(gravityVector(asteroid, game.sun));
       });
-      this.ship.move(gravityVector(this.ship, game.sun));
+      this.ship.move(gravityVector(this.ship, this.sun));
       this.bullets.forEach(function(bullet) {
-        bullet.move(game.gravityVector());
+        bullet.move();
       });
     };
   
     Game.prototype.checkCollisions = function() {
-      var gameInstance = this;
+      var game = this;
       var destroyBullets = [];
       var destroyAsteroids = [];
     
       this.asteroids.forEach(function(asteroid) {
-        if(gameInstance.ship.bounced > 0){
-          gameInstance.ship.bounced -= 1;
+        if(game.ship.bounced > 0){
+          game.ship.bounced -= 1;
         }
 
-        if (asteroid.isCollidedWith(gameInstance.ship)) {
-          if(gameInstance.ship.bounced === 0){
-            gameInstance.ship.shipDie(asteroid.vel);
-            gameInstance.gameOver();
+        if (asteroid.isCollidedWith(game.ship)) {
+          if(game.ship.bounced === 0){
+            game.ship.shipDie(asteroid.vel);
+            // game.gameOver();
           }
         }
 
-        gameInstance.bullets.forEach(function(bullet) {
+        game.bullets.forEach(function(bullet) {
           if (bullet.isCollidedWith(asteroid)) {
             destroyBullets.push(bullet);
             destroyAsteroids.push(asteroid);
@@ -259,28 +238,27 @@
       this.bullets.forEach( function(bullet) {
         if (bullet.lifespan <= 0) {
           destroyBullets.push(bullet);
-          gameInstance.scene.remove(bullet.object);
+          game.scene.remove(bullet.object);
         }
       });
       destroyBullets.forEach(function(bullet) {
-        var index = gameInstance.bullets.indexOf(bullet);
-        gameInstance.scene.remove(bullet.object);
+        var index = game.bullets.indexOf(bullet);
+        game.scene.remove(bullet.object);
         if (index !== -1) {
-          gameInstance.bullets.splice(index, 1);
+          game.bullets.splice(index, 1);
         }
       });
 
       destroyAsteroids.forEach(function(asteroid) {
-        var index = gameInstance.asteroids.indexOf(asteroid);
-        var newAsteroids = gameInstance.spawnBabies(asteroid);
-        gameInstance.hits += 1;
-        gameInstance.asteroids = gameInstance.asteroids.concat(newAsteroids);
+        var index = game.asteroids.indexOf(asteroid);
+        var newAsteroids = game.spawnBabies(asteroid);
+        game.hits += 1;
+        game.asteroids = game.asteroids.concat(newAsteroids);
         newAsteroids.forEach(function(ast) {
-          gameInstance.scene.add(ast.object);
+          game.scene.add(ast.object);
         })
-        gameInstance.asteroids.splice(index, 1);
-        gameInstance.scene.remove(asteroid.object);
-        $(".scoreBox").html("Asteroids Destroyed: "+gameInstance.hits);
+        game.scene.remove(asteroid.object);
+        game.asteroids.splice(index, 1);
       });
     };
   

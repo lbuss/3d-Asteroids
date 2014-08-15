@@ -3,8 +3,8 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});  
     
   var Bullet = Asteroids.Bullet = function(pos, vel) {
-    Asteroids.MovingObject.call({object: this, pos: pos, vel: vel, radius: 3, color: '#FF0000'});
-    this.lifespan = 30;
+    Asteroids.MovingObject.call( this, {pos: pos, vel: vel, radius: 3, color: '#FF0000'} );
+    this.lifespan = 90;
   };
   
   Bullet.inherits(Asteroids.MovingObject);
