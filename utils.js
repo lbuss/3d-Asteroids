@@ -1,3 +1,9 @@
+Function.prototype.inherits = function (parentClass) {
+  function Surrogate() {}
+  Surrogate.prototype = parentClass.prototype;
+  this.prototype = new Surrogate();
+};
+
 function toScreenXY( position, camera, div) {
   var pos = position.clone();
   projScreenMat = new THREE.Matrix4();
@@ -28,4 +34,9 @@ var gravityVector = function(obj, obj2) {
   var unitVec = [ Math.floor(pos1[0]-pos2[0])/dist, Math.floor(pos1[1]-pos2[1])/dist, Math.floor(pos1[2]-pos2[2])/dist ];
   
   return [-unitVec[0]*mag, -unitVec[1]*mag, -unitVec[2]*mag];
+}
+
+function openInNewTab(url) {
+  var win = window.open(url, '_blank');
+  win.focus();
 }

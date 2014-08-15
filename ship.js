@@ -3,15 +3,17 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});
   
   
-  var Ship = Asteroids.Ship = function(pos, vel) {
+  var Ship = Asteroids.Ship = function(options) {
     
     var geometry = new THREE.CylinderGeometry( 7, 0, 15, 32 );
     this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: '#949494' } ) );
-    this.object.position.x = pos[0];
-    this.object.position.z = pos[1];
+    this.object.position.x = options.pos[0];
+    this.object.position.z = options.pos[1];
     this.object.rotation.z = Math.PI/2;
-
-    Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
+    this.mass = 200;
+    
+    this.vel = options.vel;
+    // Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
     
     //TODO: modify heading to 3d
     this.heading = 0;
@@ -32,28 +34,18 @@
     }
   };
   
-  Ship.prototype.move = function (maxX, maxY) {
-      if (Math.abs(this.vel[0]) + Math.abs(this.vel[1]) > 5 && !this.dead){
-        this.vel[0] *= .95;
-        this.vel[1] *= .95;
-      }
-      this.pos[0] += this.vel[0];
-      this.pos[1] += this.vel[1];
-      
+  Ship.prototype.move = function (grav) {
       this.object.rotation.y = (this.heading)/360 * 2 * Math.PI;
       
       this.object.position.x += this.vel[0];
       this.object.position.z -= this.vel[1];
+      this.object.position.y += this.vel[2];
       
-      if (this.object.position.x < -maxX){
-        this.object.position.x = maxX
-      }if (this.object.position.x > maxX){
-        this.object.position.x = -maxX
-      }if (this.object.position.z < -maxY){
-        this.object.position.z = maxY
-      }if (this.object.position.z > maxY){
-        this.object.position.z = -maxY
-      }
+      if(grav != null){
+        this.vel[0] += grav[0];
+        this.vel[1] += grav[1];
+        this.vel[2] += grav[2];
+      }  
   };
   
   Ship.prototype.power = function(impulse) {

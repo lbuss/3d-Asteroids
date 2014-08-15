@@ -2,7 +2,6 @@
 <header>
   <script src="three.min.js"></script>
   <script src="keymaster.js"></script>
-  <script src="inherits.js"></script>
   <script src="utils.js"></script>
   <script src="orbit_controls.js"></script>
   <script src="moving_object.js"></script>
@@ -17,9 +16,26 @@
 
 <body>
   <div id="container">
+      <div id="links">
+        <div id="linksWrap" class="infoWrap">
+          My Work<br>
+        </div>
+      </div>
+
+      <div id="about">
+        <div id="aboutWrap" class="infoWrap">
+          About Me<br><br>
+          I am a rails/javascript developer looking for work in the Bay Area. Contact me at LawSBuss@gmail.com or check out my github at <a href="https://github.com/lbuss" target="_blank">github.com/lbuss</a>
+        </div>
+      </div>
+      
+      <div id="controls">
+        <div id="controlsWrap" class="infoWrap">
+          scroll +/-, click and drag
+        </div>
+      </div>
+    </div>
   </div>
-  <br>
-  <h4 class="scoreBox"></h4>
   <script>
     var g = new Asteroids.Game();
     g.start();

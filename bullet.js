@@ -3,11 +3,7 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});  
     
   var Bullet = Asteroids.Bullet = function(pos, vel) {
-    // var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-//     this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: '#FF0000' } ) );
-//     this.object.position.x = pos[0];
-//     this.object.position.z = pos[1];
-    Asteroids.MovingObject.call(this, pos, vel, 3, '#FF0000');
+    Asteroids.MovingObject.call({object: this, pos: pos, vel: vel, radius: 3, color: '#FF0000'});
     this.lifespan = 30;
   };
   

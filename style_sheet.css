@@ -1,20 +1,66 @@
-body{
-  background-color: black;
+.highlighted {
+  background-color: green;
+  color: black;
 }
 
-
-canvas {
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
-}
-
-h2{
-  color: red;
+#controls {
+  position: absolute;
+  width:400px;
+  margin-left:-200px;
+  top: 2%;
+  left:50%;
+  
   text-align: center;
 }
 
-.scoreBox{
-  color: red;
+#links {
+  /*border-style: solid;
+  border-color: green;
+  border-width: 1px;*/
+  position: absolute;
+  top: 40%;
+  width: 100%;
+  left: 2%;
+  
+  text-align: left;
+}
+
+#about {
+  position: absolute;
+  top: 40%;
+  width: 100%;
+  right: 130px;
+  width: 40px;
   text-align: center;
+}
+
+#description{
+  position: absolute;
+  text-align: center;
+  max-width: 100px;
+}
+
+.infoWrap {
+  padding: 5px;
+  display: inline-block;
+  outline: 1px solid green;
+  background-color: rgba(0, 0, 0, .8);
+}
+
+a{
+  color: green;
+  text-decoration: none;
+}
+
+a:hover{
+  background-color: green;
+  color: black;
+}
+
+body {
+  color: green;
+  font-family: Monospace;
+  background-color: green;
+  margin: 0px;
+  overflow: hidden;
 }

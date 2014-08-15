@@ -3,23 +3,24 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});
   
   
-  var Asteroid = Asteroids.Asteroid = function(pos, vel, radius, color) {
-    this.mass = radius*radius;
-    Asteroids.MovingObject.call(this, pos, vel, radius, color);
+  var Asteroid = Asteroids.Asteroid = function(options) {
+    this.mass = options.radius*options.radius;
+    Asteroids.MovingObject.call(this, options);
   };
   
   Asteroid.inherits(Asteroids.MovingObject);
   
   Asteroid.prototype.randomAsteroid = function (dimX, dimY, radius) {
     
-    var x = Math.random()*400 +300;
+    var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+    
+    var x = (Math.random()*300 +300) * plusOrMinus;
     var y = 0;
+    var z = plusOrMinus * 50 * Math.random();
 
     var velX = 0;
+    var velY = Math.floor(plusOrMinus * 5 *(x/700) + 2*(radius*radius/(25*25)) );
 
-    var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
-    var velY = Math.floor(plusOrMinus * ((Math.random()*5) + 3));
-    
-    return new Asteroid([x, y, 0], [velX, velY, 0], radius);
+    return new Asteroid({pos: [x, y, z], vel: [velX, velY, 0], radius: radius});
   };
 })(this);
