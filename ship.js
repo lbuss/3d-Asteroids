@@ -10,7 +10,7 @@
     this.object.position.x = options.pos[0];
     this.object.position.z = options.pos[1];
     this.object.rotation.z = Math.PI/2;
-    this.mass = 400;
+    this.mass = 20;
     
     this.vel = options.vel;
     // Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
@@ -36,14 +36,8 @@
   
   Ship.prototype.move = function (grav) {
       this.object.rotation.y = (this.heading)/360 * 2 * Math.PI;
-      
-      this.object.position.x += this.vel[0];
-      this.object.position.z += this.vel[1];
-      this.object.position.y += this.vel[2];
-     
-      this.vel[0] += grav[0];
-      this.vel[1] += grav[1];
-      this.vel[2] += grav[2];
+    
+      Asteroids.MovingObject.prototype.move.call(this, grav);
   };
   
   Ship.prototype.power = function(impulse) {
@@ -52,9 +46,9 @@
   };
   
   Ship.prototype.fireBullet = function() {
-    var bulletSpeed = 1;
-    var bulletVel = [headingVec(this.heading)[0]*bulletSpeed,
-                     -headingVec(this.heading)[1]*bulletSpeed,
+    var bulletSpeed = 2;
+    var bulletVel = [headingVec(this.heading)[0]*bulletSpeed+this.vel[0],
+                     -headingVec(this.heading)[1]*bulletSpeed+this.vel[1],
                      0];
     var bulletPos = [this.object.position.x, this.object.position.z, this.object.position.y];
     return new Asteroids.Bullet(bulletPos, bulletVel);

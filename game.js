@@ -24,8 +24,8 @@
     this.hits = 0;
     
     this.view = 0;
-    this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-    this.camera.position.set(-700, 700, 700);
+    this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 30000 );
+    this.camera.position.set(-1600, 1600, 1600);
 
     controls = new THREE.OrbitControls( this.camera );
     var game = this;
@@ -47,9 +47,9 @@
   Game.prototype.createShip = function(){ 
     var object = this.addAsteroid();
     
-    this.ship = new Asteroids.Ship({pos: [700, 0, 0], vel: [0, 5, 0]});
+    this.ship = new Asteroids.Ship({pos: [2000, 0, 0], vel: [0, 15, 0]});
     this.ship.text = 'Super 3d asteroids';
-    this.ship.description = 'Take on the asteroids!';
+    this.ship.description = 'Take on the asteroids! Read controls at top of screen';
     this.ship.divName = 'ship';
     
     var game = this;
@@ -64,11 +64,19 @@
   }
   
   Game.prototype.createPlanets = function(){  
-    var linkUrl = ["http://packoverflow.herokuapp.com"];
-    var linkName = ["packoverflow", "asteroids", "trelloclone", "ChatApp", "Resume"];
+    var linkUrl = ["http://packoverflow.herokuapp.com",
+                   "/asteroids/index.html",
+                   "/asteroids_3d/index.html",
+                   "/old_stuff/chatScript.html",
+                   "https://docs.google.com/document/d/1ZCjbCzfN1mTdS_MAjaZOTTTyvWiMpByEbV54VDybdNg/pub"];
+    var linkName = ["packoverflow",
+                    "asteroids",
+                    "3d asteroids",
+                    "ChatApp", 
+                    "Resume"];
     var descriptions = ["PackOverflow is a loose clone of StackOverflow, built on Rails and Backbone. It demonstrates various aspects of database management and dynamic pages",
     "Asteroids is a javascript/html5 game utilizing asynchronous event handling",
-    "TrelloClone is a Rails/Backbone app heavily utilizing the Twitter Bootstrap framework and the JQuery sortable feature",
+    "Asteroids 3d technical demo, left is fps view, right is top down. Arrows and space to control.",
     "ChatApp is a simple javascript chat client handled by server-side PHP",
     "It's my resume"
     ];   
@@ -79,7 +87,7 @@
         var object = game.addAsteroid();
         
         object.text = linkName[i];
-        object.link = linkUrl[0];
+        object.link = linkUrl[i];
         object.description = descriptions[i];
         object.divName = 'link'+i;
         
@@ -98,7 +106,7 @@
     light = new THREE.PointLight( 0xffffff, 2, 0);
     this.scene.add( light );
     
-    this.sun = new Asteroids.Asteroid({pos:[0,0,0], vel:[0,0,0] , radius: 100, color: '#FFCC33', emissive: 0xCCFF66 });
+    this.sun = new Asteroids.Asteroid({pos:[0,0,0], vel:[0,0,0] , radius: 400, color: '#FFCC33', emissive: 0xCCFF66 });
     
     this.scene.add(this.sun.object);
   }
@@ -139,7 +147,7 @@
     }
 
     Game.prototype.addAsteroid = function(){
-      var rad = 5 + 20 * Math.random();
+      var rad = 50 + 100 * Math.random();
       var ast = Asteroids.Asteroid.prototype.randomAsteroid(this.DIM_X, this.DIM_Y, rad);
       this.asteroids.push(ast);
       this.scene.add(ast.object);
@@ -192,7 +200,7 @@
         switch(game.view){
           case 0: game.view = 1; $('.infoWrap').hide(); break;
           
-          case 1: game.view = 0; $('.infoWrap').show(); game.camera.position.set(-700, 700, 700); break;
+          case 1: game.view = 0; $('.infoWrap').show(); game.camera.position.set(-1600, 1600, 1600); break;
         }
       });
 
@@ -257,8 +265,8 @@
         newAsteroids.forEach(function(ast) {
           game.scene.add(ast.object);
         })
-        game.scene.remove(asteroid.object);
         game.asteroids.splice(index, 1);
+        game.scene.remove(asteroid.object);
       });
     };
   
