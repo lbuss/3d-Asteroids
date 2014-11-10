@@ -27,10 +27,10 @@
     this.object.position.z += this.vel[1];
     this.object.position.y += this.vel[2];
     
-    if(grav){
-      this.vel[0] += grav[0];
-      this.vel[1] += grav[1];
-      this.vel[2] += grav[2];
+    if(this.mass && grav){
+      this.vel[0] += grav[0]/this.mass;
+      this.vel[1] += grav[1]/this.mass;
+      this.vel[2] += grav[2]/this.mass;
     }
   };
 })(this);

@@ -48,7 +48,7 @@
     var object = this.addAsteroid();
     
     this.ship = new Asteroids.Ship({pos: [2000, 0, 0], vel: [0, 15, 0]});
-    this.ship.text = 'Super 3d asteroids';
+    this.ship.text = 'Pause and highlight ship';
     this.ship.description = 'Take on the asteroids! Read controls at top of screen';
     this.ship.divName = 'ship';
     
@@ -72,7 +72,7 @@
     var linkName = ["packoverflow",
                     "asteroids",
                     "3d asteroids",
-                    "ChatApp", 
+                    "PHP ChatApp", 
                     "Resume"];
     var descriptions = ["PackOverflow is a loose clone of StackOverflow, built on Rails and Backbone. It demonstrates various aspects of database management and dynamic pages",
     "Asteroids is a javascript/html5 game utilizing asynchronous event handling",
@@ -127,12 +127,12 @@
     if (this.view === 0){
       this.updateCamera();
     }else{
-      this.updateCamera2();
+      this.updateCameraShip();
     }
       
   }
   
-  Game.prototype.updateCamera2 = function(){
+  Game.prototype.updateCameraShip = function(){
        this.camera.position.set(this.ship.object.position.x, 10, this.ship.object.position.z);
        this.camera.rotation.y = this.ship.object.rotation.y- Math.PI/2;
        this.camera.rotation.x = this.ship.object.rotation.x;
@@ -148,7 +148,7 @@
 
     Game.prototype.addAsteroid = function(){
       var rad = 50 + 100 * Math.random();
-      var ast = Asteroids.Asteroid.prototype.randomAsteroid(this.DIM_X, this.DIM_Y, rad);
+      var ast = Asteroids.Asteroid.prototype.randomAsteroid(rad, this.sun);
       this.asteroids.push(ast);
       this.scene.add(ast.object);
       return ast;
