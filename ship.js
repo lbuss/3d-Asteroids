@@ -26,27 +26,29 @@
   
   
   Ship.prototype.navigate = function() {
-    var turnSpeed = 10;
+    var turnSpeed = 5;
     if(this.dead === null){
       if(key.isPressed("up")) this.power(headingVec(this.heading));  
       if(key.isPressed("right")) this.heading -= turnSpeed;
       if(key.isPressed("left")) this.heading += turnSpeed;
+      if(key.isPressed("down")) this.power(headingVec(this.heading));
     }
   };
   
-  Ship.prototype.move = function (grav) {
+  Ship.prototype.move = function () {
       this.object.rotation.y = (this.heading)/360 * 2 * Math.PI;
     
-      Asteroids.MovingObject.prototype.move.call(this, grav);
+      //removing ship gravity for easier gameplay
+      Asteroids.MovingObject.prototype.move.call(this);
   };
   
   Ship.prototype.power = function(impulse) {
-    this.vel[0] += impulse[0]/10;
-    this.vel[1] -= impulse[1]/10;
+    this.vel[0] += impulse[0]/20;
+    this.vel[1] -= impulse[1]/20;
   };
   
   Ship.prototype.fireBullet = function() {
-    var bulletSpeed = 2;
+    var bulletSpeed = 5;
     var bulletVel = [headingVec(this.heading)[0]*bulletSpeed+this.vel[0],
                      -headingVec(this.heading)[1]*bulletSpeed+this.vel[1],
                      0];

@@ -7,23 +7,32 @@
 
     this.mass = options.mass || options.radius*options.radius;
 
-    options.emissive = options.emissive || 0x000000;
+    options.emissive = options.emissive || 0x080808;
     
     Asteroids.MovingObject.call(this, options);
   };
   
   Asteroid.inherits(Asteroids.MovingObject);
   
- Asteroid.prototype.randomAsteroid = function (radius, sun) {
+  Asteroid.prototype.randomAsteroid = function (radius, sun) {
     
+    var angle = Math.floor(Math.random() * 360);
+    var startDist = 1000 + Math.floor(Math.random() * 1000);
+
+
+
+    var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+
     var mass = radius*radius;
 
-    var x = (Math.random()*1000 + 1000) * plusOrMinus();
-    var y = 0;
-    var z = plusOrMinus() * 50 * Math.random();
+    var x = startDist * Math.cos(angle);
+    var y = startDist * Math.sin(angle);
+    var z = plusOrMinus * 50 * Math.random();
 
-    var velX = 0;
-    var velY = Math.sqrt((sun.mass+mass)/x);
+    var velMag = Math.sqrt((sun.mass+mass)/startDist);
+
+    var velX = -velMag * Math.sin(angle);
+    var velY = velMag * Math.cos(angle);
 
     return new Asteroid({pos: [x, y, z], vel: [velX, velY, 0], radius: radius, mass: mass});
   };

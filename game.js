@@ -4,10 +4,10 @@
   
   var Game = Asteroids.Game = function () {
 
-    this.scene = new THREE.Scene();
     this.mouse = new THREE.Vector2();
     this.intersects = [];
     this.animId = null;
+    this.paused = false;
     
     this.projector = new THREE.Projector();
     this.raycaster = new THREE.Raycaster();
@@ -23,15 +23,21 @@
     this.bullets = [];
     this.hits = 0;
     
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
     this.view = 0;
-    this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 30000 );
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera( 70, width / height, 1, 30000 );
     this.camera.position.set(-1600, 1600, 1600);
+    this.focusPoints = [this.scene.position];
+    this.camera.lookAt(this.scene.position);
 
     controls = new THREE.OrbitControls( this.camera );
     var game = this;
    
     // document.addEventListener( 'mousemove', this.onDocumentMouseMove, false);
-    document.addEventListener( 'mousedown', this.onDocumentMouseDown, false);
+    // document.addEventListener( 'mousedown', this.onDocumentMouseDown, false);
     // window.addEventListener( 'resize', this.onWindowResize, false );
     $('#description').remove();
   };
@@ -47,7 +53,7 @@
   Game.prototype.createShip = function(){ 
     var object = this.addAsteroid();
     
-    this.ship = new Asteroids.Ship({pos: [2000, 0, 0], vel: [0, 15, 0]});
+    this.ship = new Asteroids.Ship({pos: [2000, 0, 0], vel: [0, 0, 0]});
     this.ship.text = 'Pause and highlight ship';
     this.ship.description = 'Take on the asteroids! Read controls at top of screen';
     this.ship.divName = 'ship';
@@ -112,15 +118,19 @@
   }
   
   Game.prototype.animate = function() {
-    this.checkCollisions();
-    this.move();
+    if(this.paused === false){
+      this.checkCollisions();
+      this.move();
+    }
     if(!this.stopAnimating){
       this.animId = requestAnimationFrame( this.animate.bind(this) );
     }else{
       cancelAnimationFrame( this.animId );
     }
     this.render();
-    this.ship.navigate();
+    if(this.paused === false){
+      this.ship.navigate();
+    }
   }
   
   Game.prototype.render = function() {
@@ -129,7 +139,6 @@
     }else{
       this.updateCameraShip();
     }
-      
   }
   
   Game.prototype.updateCameraShip = function(){
@@ -142,7 +151,13 @@
      }
   
     Game.prototype.updateCamera = function(){
-      this.camera.lookAt( this.scene.position );
+      if(this.focusPoints.length > 0){
+        this.camera.lookAt(this.focusPoints[this.focusPoints.length-1])
+        if(this.focusPoints.length > 1){
+          this.focusPoints.pop()
+        }
+      }
+
       this.renderer.render( this.scene, this.camera);
     }
 
@@ -165,11 +180,15 @@
       if (asteroid.radius < 12) {
         return babies;
       }else {
+        var radius = 0;
+        var ratio;
         for (var i = 0; i < 3; i++){
-          var velX = asteroid.vel[0] * Math.random()-.5;
-          var velY = asteroid.vel[1] * Math.random()-.5;
-          var velZ = asteroid.vel[2] * Math.random()-.5;
-          babies.push(new Asteroids.Asteroid({pos:[asteroid.object.position.x, asteroid.object.position.z, asteroid.object.position.y], vel: [velX, velY, velZ], radius: asteroid.object.radius/(Math.random()+1.5)}));
+          radius = asteroid.object.radius/(Math.random()+1.5);
+          ratio = asteroid.radius/radius;
+          var velX = asteroid.vel[0] * ratio * Math.random()-.5;
+          var velY = asteroid.vel[1] * ratio * Math.random()-.5;
+          var velZ = asteroid.vel[2] * ratio * Math.random()-.5;
+          babies.push(new Asteroids.Asteroid({pos:[asteroid.object.position.x, asteroid.object.position.z, asteroid.object.position.y], vel: [velX, velY, velZ], radius: radius, emissive: asteroid.object.material.emissive}));
         }
       }
       return babies;
@@ -211,7 +230,8 @@
       this.asteroids.forEach(function(asteroid) {
         asteroid.move(gravityVector(asteroid, game.sun));
       });
-      this.ship.move(gravityVector(this.ship, this.sun));
+      //add gravityVector(this.ship, this.sun) and change ship.move method to accept it to add ship gravity
+      this.ship.move();
       this.bullets.forEach(function(bullet) {
         bullet.move();
       });
@@ -221,23 +241,30 @@
       var game = this;
       var destroyBullets = [];
       var destroyAsteroids = [];
+      var fragmentAsteroids = [];
     
       this.asteroids.forEach(function(asteroid) {
-        if(game.ship.bounced > 0){
-          game.ship.bounced -= 1;
-        }
+        
+        //ship collisions disabled currently
+        // if(game.ship.bounced > 0){
+        //   game.ship.bounced -= 1;
+        // }
 
-        if (asteroid.isCollidedWith(game.ship)) {
-          if(game.ship.bounced === 0){
-            game.ship.shipDie(asteroid.vel);
-            // game.gameOver();
-          }
-        }
+        // if (asteroid.isCollidedWith(game.ship)) {
+        //   if(game.ship.bounced === 0){
+        //     game.ship.shipDie(asteroid.vel);
+        //     // game.gameOver();
+        //   }
+        // }
+        if (asteroid.isCollidedWith(game.sun)) {
+            destroyAsteroids.push(asteroid);
+            return;
+        } 
 
         game.bullets.forEach(function(bullet) {
           if (bullet.isCollidedWith(asteroid)) {
             destroyBullets.push(bullet);
-            destroyAsteroids.push(asteroid);
+            fragmentAsteroids.push(asteroid);
           } 
         });
 
@@ -249,6 +276,13 @@
           game.scene.remove(bullet.object);
         }
       });
+
+      destroyAsteroids.forEach(function(asteroid) {
+        var index = game.asteroids.indexOf(asteroid);
+        game.asteroids.splice(index, 1);
+        game.scene.remove(asteroid.object);
+      });
+
       destroyBullets.forEach(function(bullet) {
         var index = game.bullets.indexOf(bullet);
         game.scene.remove(bullet.object);
@@ -257,7 +291,7 @@
         }
       });
 
-      destroyAsteroids.forEach(function(asteroid) {
+      fragmentAsteroids.forEach(function(asteroid) {
         var index = game.asteroids.indexOf(asteroid);
         var newAsteroids = game.spawnBabies(asteroid);
         game.hits += 1;
@@ -269,58 +303,7 @@
         game.scene.remove(asteroid.object);
       });
     };
-  
-    Game.prototype.createInfo = function(object) {
-      $('#description').remove();
-      var div = document.createElement('div');
-      var div2 = document.createElement('div');
-      $(div).attr('id', 'description');
-      $(div2).addClass('infoWrap');
-      $(div2).html(object.description);
-      $(div).html(div2);
-      $('body').append(div);
-      var pos = toScreenXY( object.position, camera, $('body'));
-      $(div).css({
-        top: pos[1],
-        left: pos[0] + 10
-      })
-    }
-    
-    Game.prototype.mark = function(object){
-      if (object.object.material.emissive !== 0xff0000){
-        object.currentHex = object.object.material.emissive.getHex();
-      }
-      object.object.material.emissive.setHex( 0xff0000 );
-      this.stopAnimating = true;
-    } 
-
-    Game.prototype.unmark = function(object){
-      object.object.material.emissive.setHex( object.currentHex );
-      $('#description').remove();
-      this.stopAnimating = false;
-      this.animate();
-    }
-  
-    Game.prototype.onWindowResize = function() {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize( window.innerWidth, window.innerHeight );
-      this.composer.reset();
-    }
-
-    Game.prototype.onDocumentMouseMove = function( event ) {
-      event.preventDefault();
-      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    }
-        
-    Game.prototype.onDocumentMouseDown = function( event ) {
-      event.preventDefault();   
-      if(this.INTERSECTED){
-        openInNewTab(this.INTERSECTED.link);
-      }
-    }
-    
+     
     Game.prototype.createInfo = function (object) {
       $('#description').remove();
       var div = document.createElement('div');
@@ -332,42 +315,85 @@
       $('body').append(div);
       var pos = toScreenXY( object.object.position, this.camera, $('body'));
       $(div).css({
-        top: pos[1],
-        left: pos[0] + 20
-      })
+        top: pos[1] + 10,
+        left: pos[0]
+      });
     }
     
-    Game.prototype.checkIntersects = function(){
-      var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
-      projector.unprojectVector( vector, camera );
-      raycaster.set( camera.position, vector.sub( camera.position ).normalize() );
-      var intersects = raycaster.intersectObjects( scene.children );
-      return intersects;
-    }
-  
-    Game.prototype.intersectBehaviour= function(intersects){
-  
-      if ( intersects.length > 0 ) {        
-    
-        if ( INTERSECTED != intersects[ 0 ].object ) {
-          $("a").removeClass("highlighted");
-          $('#description').remove();
-      
-          if ( INTERSECTED ) 
-          INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-          INTERSECTED = intersects[ 0 ].object;
-          INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-          INTERSECTED.material.emissive.setHex( 0xff0000 );
-          $("#"+INTERSECTED.divName).addClass("highlighted");
-          createInfo(INTERSECTED);
-        }
-      } else {
-    
-        if ( INTERSECTED ) 
-        INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-        $("a").removeClass("highlighted");
-        INTERSECTED = null;
-
+    Game.prototype.mark = function(object){
+      if (object.object.material.emissive !== 0xff0000){
+        object.currentHex = object.object.material.emissive.getHex();
       }
+      object.object.material.emissive.setHex( 0xff0000 );
+
+      var pos = toScreenXY( object.object.position, this.camera, $('body'));
+      this.focusPoints = panArray(object.object.position, this.focusPoints[this.focusPoints.length-1]);
+      this.paused = true;
+    } 
+
+    Game.prototype.unmark = function(object){
+      this.camera.lookAt( this.scene.position );
+      object.object.material.emissive.setHex( object.currentHex );
+      $('#description').remove();
+      this.focusPoints = panArray(this.sun.object.position, this.focusPoints[this.focusPoints.length-1]);
+      this.paused = false;
+      // this.animate();
     }
+  
+    // Game.prototype.onWindowResize = function() {
+    //   this.camera.aspect = window.innerWidth / window.innerHeight;
+    //   this.camera.updateProjectionMatrix();
+    //   this.renderer.setSize( window.innerWidth, window.innerHeight );
+    //   this.composer.reset();
+    // }
+
+    // Game.prototype.onDocumentMouseMove = function( event ) {
+    //   event.preventDefault();
+    //   this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    //   this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    // }
+    
+    //deprecated functionality to check if mousing over 3d rendered objects
+    //might be useful later
+    // Game.prototype.onDocumentMouseDown = function( event ) {
+    //   event.preventDefault();   
+    //   if(this.INTERSECTED){
+    //     openInNewTab(this.INTERSECTED.link);
+    //   }
+    // }
+    
+    // Game.prototype.checkIntersects = function(){
+    //   var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+    //   projector.unprojectVector( vector, camera );
+    //   raycaster.set( camera.position, vector.sub( camera.position ).normalize() );
+    //   var intersects = raycaster.intersectObjects( scene.children );
+    //   return intersects;
+    // }
+    
+
+    // Game.prototype.intersectBehaviour= function(intersects){
+  
+    //   if ( intersects.length > 0 ) {        
+    
+    //     if ( INTERSECTED != intersects[ 0 ].object ) {
+    //       $("a").removeClass("highlighted");
+    //       $('#description').remove();
+      
+    //       if ( INTERSECTED ) 
+    //       INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    //       INTERSECTED = intersects[ 0 ].object;
+    //       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+    //       INTERSECTED.material.emissive.setHex( 0xff0000 );
+    //       $("#"+INTERSECTED.divName).addClass("highlighted");
+    //       createInfo(INTERSECTED);
+    //     }
+    //   } else {
+    
+    //     if ( INTERSECTED ) 
+    //     INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    //     $("a").removeClass("highlighted");
+    //     INTERSECTED = null;
+
+    //   }
+    // }
   })(this);

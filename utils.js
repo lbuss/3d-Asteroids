@@ -12,6 +12,30 @@ function toScreenXY( position, camera, div) {
   return [( pos.x + 1 ) * div.width() / 2, ( - pos.y + 1) * div.height() / 2 ]
 };
 
+var panArray = function(p1, p2){
+  var d1 = (p2['x'] - p1['x'])/32;
+  var d2 = (p2['y'] - p1['y'])/32;
+  var d3 = (p2['z'] - p1['z'])/32;
+  var array =[];
+  for(i = 0; i<5 ;i++){
+    array.push(
+      new THREE.Vector3(
+      p1['x'] + d1 * Math.pow(2, i),
+      p1['y'] + d2 * Math.pow(2, i),
+      p1['z'] + d3 * Math.pow(2, i))
+    )
+  }
+  for(i = 3; i>-1 ;i--){
+    array.push(
+      new THREE.Vector3(
+      p1['x'] + d1 * Math.pow(2, 5) - d1 * Math.pow(2, i),
+      p1['y'] + d2 * Math.pow(2, 5) - d2 * Math.pow(2, i),
+      p1['z'] + d3 * Math.pow(2, 5) - d3 * Math.pow(2, i))
+    )
+  }
+  return array;
+}
+
 var headingVec = function(heading){
   var x = Math.cos(heading/180 * Math.PI) * 10;
   var y = Math.sin(heading/180 * Math.PI) * 10;
@@ -41,13 +65,9 @@ var gravityVector = function(obj, obj2) {
   var unitVec = [ Math.floor(pos1[0]-pos2[0])/dist, Math.floor(pos1[1]-pos2[1])/dist, Math.floor(pos1[2]-pos2[2])/dist ];
   
   return [-unitVec[0]*mag, -unitVec[1]*mag, -unitVec[2]*mag];
-}
-
-var plusOrMinus = function(){
-  return Math.random() < 0.5 ? -1 : 1;
-}
+};
 
 function openInNewTab(url) {
-  var win = window.open(url, '_blank');
-  win.focus();
-}
+  // var win = window.open(url, '_blank');
+  // win.focus();
+};
