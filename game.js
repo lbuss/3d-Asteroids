@@ -5,7 +5,6 @@
   var Game = Asteroids.Game = function () {
 
     this.mouse = new THREE.Vector2();
-    this.intersects = [];
     this.animId = null;
     this.paused = false;
     
@@ -18,10 +17,13 @@
     
     $('#container').append(this.renderer.domElement);
 
+    this.htmlChanger = new Asteroids.htmlChanger;
+
     this.asteroids = [];
     this.enemies = [];
     this.bullets = [];
     this.explosions = [];
+    this.intersected = null;
     this.hits = 0;
     
     var width = window.innerWidth;
@@ -37,8 +39,8 @@
     controls = new THREE.OrbitControls( this.camera );
     var game = this;
    
-    // document.addEventListener( 'mousemove', this.onDocumentMouseMove, false);
-    // document.addEventListener( 'mousedown', this.onDocumentMouseDown, false);
+    document.addEventListener( 'mousemove', this.onDocumentMouseMove.bind(this), false);
+    document.addEventListener( 'mousedown', this.onDocumentMouseDown.bind(this), false);
     // window.addEventListener( 'resize', this.onWindowResize, false );
     $('#description').remove();
   };
@@ -60,9 +62,10 @@
     this.ship.divName = 'ship';
     
     var game = this;
-    $('#linksWrap').append("<br><a href='' id='ship'>"+this.ship.text+"</a><br>");
-    $('#ship').hover(function(){game.mark(game.ship); game.createInfo(game.ship)}, function(){game.unmark(game.ship)});
     
+    $('#ship').hover(function(){game.linkHover(game.ship)}, function(){game.linkUnhover(game.ship)});
+    this.htmlChanger.appendLink(this.ship);
+
     this.scene.add( this.ship.object );
     
     
@@ -98,10 +101,29 @@
         object.description = descriptions[i];
         object.divName = 'link'+i;
         
-        $('#linksWrap').append("<br><a href="+object.link+" target='_blank' id="+object.divName+">"+object.text+"</a><br>");
-        $("#"+object.divName).hover(function(){game.mark(object); game.createInfo(object)}, function(){game.unmark(object)});
+
+        game.htmlChanger.appendLink(object);
+        $("#"+object.divName).hover(function(){game.linkHover(object)}, function(){game.linkUnhover(object)});
       })();
     }
+  }
+
+  Game.prototype.linkHover = function(object){
+    var game = this;
+    game.pause();
+    game.focusOnObject(object);
+    object.highLight();
+    game.htmlChanger.createInfo(object);
+    game.htmlChanger.highlightLink(object);
+  }
+
+  Game.prototype.linkUnhover = function(object){
+    var game = this;
+    object.unhighLight();
+    game.focusOnObject(game.sun);
+    game.htmlChanger.removeInfo();
+    game.htmlChanger.unhighlightLink(object);
+    game.unpause();
   }
   
   Game.prototype.createSolarSystem = function() {
@@ -198,7 +220,7 @@
       var bull = this.ship.fireBullet();
       this.bullets.push(bull);
       this.scene.add(bull.object);
-    }
+    };
   
     Game.prototype.spawnBabies = function(asteroid) {
       //generates smaller asteroid fragments from a parent asteroid
@@ -354,36 +376,17 @@
       game.scene.remove(asteroid.object);
     };
 
-    Game.prototype.createInfo = function (object) {
-      $('#description').remove();
-      var div = document.createElement('div');
-      var div2 = document.createElement('div');
-      $(div).attr('id', 'description');
-      $(div2).addClass('infoWrap');
-      $(div2).html(object.description);
-      $(div).html(div2);
-      $('body').append(div);
-      //code for placing info using positions of three.js objects-current version centers camera focus on object instead.
-      // var pos = toScreenXY( object.object.position, this.camera, $('body'));
-      $(div).css({
-        top:  window.innerHeight/2,
-        left: window.innerWidth/2 + 40
-      });
-    };
-    
-    Game.prototype.mark = function(object){
-      object.highLight();
-      var pos = toScreenXY( object.object.position, this.camera, $('body'));
-      this.focusPoints = panArray(object.object.position, this.focusPoints[this.focusPoints.length-1]);
+    Game.prototype.pause = function(){
       this.paused = true;
-    } ;
+    }
 
-    Game.prototype.unmark = function(object){
-      object.unhighLight();
-      $('#description').remove();
-      this.focusPoints = panArray(this.sun.object.position, this.focusPoints[this.focusPoints.length-1]);
+    Game.prototype.unpause = function(){
       this.paused = false;
-    };
+    }
+
+    Game.prototype.focusOnObject = function(object) {
+      this.focusPoints = panArray(object.object.position, this.focusPoints[this.focusPoints.length-1]);
+    }
   
 
     //ship collisions disabled
@@ -400,48 +403,74 @@
     // }
 
     // mouse position in browser
-    // Game.prototype.onDocumentMouseMove = function( event ) {
-    //   event.preventDefault();
-    //   this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    //   this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    // }
+    Game.prototype.onDocumentMouseMove = function( event ) {
+      event.preventDefault();
+      this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      // this.intersectBehaviour(this.checkIntersects());
+    }
     
     //check for clicks on canvas objects
-    // Game.prototype.onDocumentMouseDown = function( event ) {
-    //   event.preventDefault();   
-    //   if(this.INTERSECTED){
-    //     openInNewTab(this.INTERSECTED.link);
-    //   }
-    // }
+    Game.prototype.onDocumentMouseDown = function( event ) {
+      // event.preventDefault();
+      var intersect = this.checkIntersects();   
+      if(intersect){
+        if (intersect.text){
+          this.intersected = intersect
+          this.linkHover(intersect);
+        } else {
+          if(intersect != this.sun && intersect != this.ship){
+            this.fragmentAsteroid(intersect);
+          }
+        }
+        // openInNewTab(this.INTERSECTED.link);
+      } else {
+        if(this.intersected){
+          this.linkUnhover(this.intersected);
+          this.unpause();
+          this.focusOnObject(this.sun);
+          this.intersected = null;
+        }
+      }
+    }
     
     // casts a ray straight into screen from mouse position into screen and returns intersected objects
-    // Game.prototype.checkIntersects = function(){
-    //   var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
-    //   projector.unprojectVector( vector, camera );
-    //   raycaster.set( camera.position, vector.sub( camera.position ).normalize() );
-    //   var intersects = raycaster.intersectObjects( scene.children );
-    //   return intersects;
-    // }
+    Game.prototype.checkIntersects = function(){
+      var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 1 );
+      this.projector.unprojectVector( vector, this.camera );
+      this.raycaster.set( this.camera.position, vector.sub( this.camera.position ).normalize() );
+      var intersects = this.raycaster.intersectObjects( this.scene.children );
+      if(intersects[0]){
+        return intersects[0].object.container;
+      }
+    }
 
-    // does some stuff to intersected objects. Probably useless and definitely would need refactoring
+    // // does some stuff to intersected objects. Probably useless and definitely would need refactoring
     // Game.prototype.intersectBehaviour= function(intersects){
     //   if ( intersects.length > 0 ) {        
-    //     if ( INTERSECTED != intersects[ 0 ].object ) {
-    //       $("a").removeClass("highlighted");
-    //       $('#description').remove();
-    //       if ( INTERSECTED ) 
-    //       INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-    //       INTERSECTED = intersects[ 0 ].object;
-    //       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-    //       INTERSECTED.material.emissive.setHex( 0xff0000 );
-    //       $("#"+INTERSECTED.divName).addClass("highlighted");
-    //       createInfo(INTERSECTED);
+    //     if ( this.INTERSECTED != intersects[ 0 ].object ) {
+    //       if ( this.INTERSECTED ){
+    //         this.INTERSECTED.unmark();
+    //         if(this.INTERSECTED.text){
+    //           this.pause();
+    //         }  
+    //       } 
+    //       this.INTERSECTED = intersects[ 0 ].object.container;
+    //       this.mark(this.INTERSECTED)  
     //     }
     //   } else {
-    //     if ( INTERSECTED ) 
-    //     INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-    //     $("a").removeClass("highlighted");
-    //     INTERSECTED = null;
+    //     // if ( this.INTERSECTED ) 
+    //     // INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    //     // $("a").removeClass("highlighted");
+    //     if (this.htmlChanger.showInfo){
+          
+    //     }else{
+    //       this.unmark(this.INTERSECTED);
+    //       this.INTERSECTED = null;
+    //       this.unpause();
+    //     }
+
     //   }
-    // }
+    // };
+
   })(this);

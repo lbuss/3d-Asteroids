@@ -6,7 +6,7 @@
   var Ship = Asteroids.Ship = function(options) {
     
     var geometry = new THREE.CylinderGeometry( 7, 0, 15, 32 );
-    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: '#949494' } ) );
+    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: '#949494', emissive: '#949494' } ) );
     this.object.position.x = options.pos[0];
     this.object.position.z = options.pos[1];
     this.object.rotation.z = Math.PI/2;

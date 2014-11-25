@@ -5,7 +5,7 @@
   var Asteroids = root.Asteroids = (root.Asteroids || {});
   
   var MovingObject = Asteroids.MovingObject = function(options){
-    
+
     var color = options.color || Math.random() * 0xffffff;
     var geometry = new THREE.SphereGeometry( options.radius, 10, 10 );
     this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: color, emissive: options.emissive } ) );
@@ -15,6 +15,7 @@
     this.object.position.y = options.pos[2];
     this.vel = options.vel;
     this.currentHex = this.object.material.emissive.getHex();
+    this.object.container = this;
 
     //enable explosion opacity setting
     if(options.explosion === true){
@@ -43,10 +44,10 @@
 
   MovingObject.prototype.highLight = function(){
     this.object.material.emissive.setHex( 0xff0000 );
-  }
+  };
 
   MovingObject.prototype.unhighLight = function(){
     this.object.material.emissive.setHex( this.currentHex );
-  }
+  };
   
 })(this);
