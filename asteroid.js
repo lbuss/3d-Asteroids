@@ -14,12 +14,11 @@
   
   Asteroid.inherits(Asteroids.MovingObject);
   
+
   Asteroid.prototype.randomAsteroid = function (radius, sun) {
     
     var angle = Math.floor(Math.random() * 360);
-    var startDist = 1000 + Math.floor(Math.random() * 1000);
-
-
+    var startDist = 1000 + Math.floor(Math.random() * 2000);
 
     var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
 

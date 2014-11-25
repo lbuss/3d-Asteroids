@@ -16,7 +16,7 @@
     // Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
     
     //TODO: modify heading to 3d
-    this.heading = 0;
+    this.heading = 180;
     this.dead = null;
     this.bounced = 0;
     
@@ -31,14 +31,12 @@
       if(key.isPressed("up")) this.power(headingVec(this.heading));  
       if(key.isPressed("right")) this.heading -= turnSpeed;
       if(key.isPressed("left")) this.heading += turnSpeed;
-      if(key.isPressed("down")) this.power(headingVec(this.heading));
+      if(key.isPressed("down")) this.power(headingVec(this.heading).map(function(el){return -el;}));
     }
   };
   
   Ship.prototype.move = function () {
       this.object.rotation.y = (this.heading)/360 * 2 * Math.PI;
-    
-      //removing ship gravity for easier gameplay
       Asteroids.MovingObject.prototype.move.call(this);
   };
   

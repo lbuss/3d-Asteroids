@@ -60,7 +60,6 @@ var gravityVector = function(obj, obj2) {
   var pos1 = [obj.object.position.x, obj.object.position.z, obj.object.position.y];
   var pos2 = [obj2.object.position.x, obj2.object.position.z, obj2.object.position.y];
   var dist = pointDistance(pos1, pos2);
-//divide by magic scaling factor since gravity is applied every frame rather //than seconds. Also not true gravity, this scaling is much easier to create a //stable system with
   var mag = (obj.mass * obj2.mass)/ (dist*dist);
   var unitVec = [ Math.floor(pos1[0]-pos2[0])/dist, Math.floor(pos1[1]-pos2[1])/dist, Math.floor(pos1[2]-pos2[2])/dist ];
   

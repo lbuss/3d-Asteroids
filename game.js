@@ -21,6 +21,7 @@
     this.asteroids = [];
     this.enemies = [];
     this.bullets = [];
+    this.explosions = [];
     this.hits = 0;
     
     var width = window.innerWidth;
@@ -28,7 +29,7 @@
 
     this.view = 0;
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera( 70, width / height, 1, 30000 );
+    this.camera = new THREE.PerspectiveCamera( 70, width / height, 1, 60000 );
     this.camera.position.set(-1600, 1600, 1600);
     this.focusPoints = [this.scene.position];
     this.camera.lookAt(this.scene.position);
@@ -54,7 +55,7 @@
     var object = this.addAsteroid();
     
     this.ship = new Asteroids.Ship({pos: [2000, 0, 0], vel: [0, 0, 0]});
-    this.ship.text = 'Pause and highlight ship';
+    this.ship.text = 'Reset Page';
     this.ship.description = 'Take on the asteroids! Read controls at top of screen';
     this.ship.divName = 'ship';
     
@@ -99,9 +100,6 @@
         
         $('#linksWrap').append("<br><a href="+object.link+" target='_blank' id="+object.divName+">"+object.text+"</a><br>");
         $("#"+object.divName).hover(function(){game.mark(object); game.createInfo(object)}, function(){game.unmark(object)});
-        
-        game.scene.add( object.object );
-        game.asteroids.push(object);
       })();
     }
   }
@@ -120,7 +118,9 @@
   Game.prototype.animate = function() {
     if(this.paused === false){
       this.checkCollisions();
+      this.removeDeadObjects();
       this.move();
+      this.ship.navigate();
     }
     if(!this.stopAnimating){
       this.animId = requestAnimationFrame( this.animate.bind(this) );
@@ -128,9 +128,6 @@
       cancelAnimationFrame( this.animId );
     }
     this.render();
-    if(this.paused === false){
-      this.ship.navigate();
-    }
   }
   
   Game.prototype.render = function() {
@@ -168,51 +165,83 @@
       this.scene.add(ast.object);
       return ast;
     };
-  
-    Game.prototype.gameOver = function() {
-      key.unbind('space, up, left, right');
-      // clearInterval(this.timerId);
+
+    Game.prototype.addExplosion = function(object, still, rad){
+      var posX = object.object.position.x;
+      var posY = object.object.position.y;
+      var posZ = object.object.position.z;
+
+      var radius = rad || object.object.radius;
+
+      var options = {
+        radius: radius,
+        mass: object.object.mass,
+        pos: [posX, posZ, posY]
+      };
+
+      if(still === true){
+        options.vel = [0,0,0];
+      }else{
+        var velX = object.vel[0];
+        var velY = object.vel[1];
+        var velZ = object.vel[2];
+        options.vel = [velX, velY, velZ];
+      }
+
+      var exp = new Asteroids.Explosion(options);
+      this.explosions.push(exp);
+      this.scene.add(exp.object);
+      return exp;
+    };
+
+    Game.prototype.addBullet = function(){
+      var bull = this.ship.fireBullet();
+      this.bullets.push(bull);
+      this.scene.add(bull.object);
     }
   
     Game.prototype.spawnBabies = function(asteroid) {
-    
+      //generates smaller asteroid fragments from a parent asteroid
       var babies = [];
       if (asteroid.radius < 12) {
         return babies;
       }else {
         var radius = 0;
         var ratio;
-        for (var i = 0; i < 3; i++){
+        for (var i = 0; i < 6; i++){
           radius = asteroid.object.radius/(Math.random()+1.5);
-          ratio = asteroid.radius/radius;
-          var velX = asteroid.vel[0] * ratio * Math.random()-.5;
-          var velY = asteroid.vel[1] * ratio * Math.random()-.5;
-          var velZ = asteroid.vel[2] * ratio * Math.random()-.5;
-          babies.push(new Asteroids.Asteroid({pos:[asteroid.object.position.x, asteroid.object.position.z, asteroid.object.position.y], vel: [velX, velY, velZ], radius: radius, emissive: asteroid.object.material.emissive}));
+          ratio = asteroid.object.radius/radius;
+
+          var velX = asteroid.vel[0] * (1 + Math.random()-.5);
+          var velY = asteroid.vel[1] * (1 + Math.random()-.5);
+          var velZ = asteroid.vel[2] * (1 + Math.random()-.5);
+
+          var posX = asteroid.object.position.x + (asteroid.object.radius * Math.random()-.5);
+          var posY = asteroid.object.position.y + (asteroid.object.radius * Math.random()-.5);
+          var posZ = asteroid.object.position.z + (asteroid.object.radius * Math.random()-.5);
+
+          babies.push(new Asteroids.Asteroid({pos:[posX, posZ, posY],
+            vel: [velX, velY, velZ],
+            radius: radius,
+            emissive: asteroid.object.material.emissive.getHex()
+          }));
         }
       }
       return babies;
     };  
   
     //BINDING
-  
     Game.prototype.bindKeyHandlers = function() {
       var game = this;
   
-      key('space', function(e) { 
+      key('space', function(e) {
         e.preventDefault();
-        var bull = game.ship.fireBullet();
-        game.bullets.push(bull);
-        game.scene.add(bull.object);
+        game.addBullet();
       });
 
       
       key('a', function() {
-        game.asteroidTimer = window.setInterval(function() {
-          if (game.asteroids.length < 30) {
-            game.addAsteroids(1);
-          }
-        }, 400);
+        game.addAsteroid();
       });
       
       key('f', function() {
@@ -224,86 +253,107 @@
       });
 
     };
-  
+    
+    //calls objects move methods with gravity or not.
     Game.prototype.move = function() {
       var game = this;
       this.asteroids.forEach(function(asteroid) {
         asteroid.move(gravityVector(asteroid, game.sun));
       });
-      //add gravityVector(this.ship, this.sun) and change ship.move method to accept it to add ship gravity
+      //add argument gravityVector(this.ship, this.sun) and change ship.move method to accept it to add ship gravity
       this.ship.move();
       this.bullets.forEach(function(bullet) {
         bullet.move();
       });
+      this.explosions.forEach(function(explosion) {
+        explosion.move();
+      });
+
     };
   
     Game.prototype.checkCollisions = function() {
       var game = this;
-      var destroyBullets = [];
-      var destroyAsteroids = [];
-      var fragmentAsteroids = [];
     
       this.asteroids.forEach(function(asteroid) {
         
-        //ship collisions disabled currently
-        // if(game.ship.bounced > 0){
-        //   game.ship.bounced -= 1;
-        // }
-
+        //ship collisions disabled currently, may come back
         // if (asteroid.isCollidedWith(game.ship)) {
         //   if(game.ship.bounced === 0){
         //     game.ship.shipDie(asteroid.vel);
         //     // game.gameOver();
         //   }
         // }
+
         if (asteroid.isCollidedWith(game.sun)) {
-            destroyAsteroids.push(asteroid);
+            game.destroyAsteroid(asteroid);
             return;
         } 
 
         game.bullets.forEach(function(bullet) {
+          if (bullet.isCollidedWith(game.sun)) {
+            game.destroyBullet(bullet);
+            game.addExplosion(bullet, true, bullet.object.radius*(1 + .5 * Math.random()));
+            return;
+          } 
+          
           if (bullet.isCollidedWith(asteroid)) {
-            destroyBullets.push(bullet);
-            fragmentAsteroids.push(asteroid);
+            game.destroyBullet(bullet);
+            game.fragmentAsteroid(asteroid);
+            game.addExplosion(bullet, true, bullet.object.radius*(1 + .5 * Math.random()));
           } 
         });
-
-      });
-
-      this.bullets.forEach( function(bullet) {
-        if (bullet.lifespan <= 0) {
-          destroyBullets.push(bullet);
-          game.scene.remove(bullet.object);
-        }
-      });
-
-      destroyAsteroids.forEach(function(asteroid) {
-        var index = game.asteroids.indexOf(asteroid);
-        game.asteroids.splice(index, 1);
-        game.scene.remove(asteroid.object);
-      });
-
-      destroyBullets.forEach(function(bullet) {
-        var index = game.bullets.indexOf(bullet);
-        game.scene.remove(bullet.object);
-        if (index !== -1) {
-          game.bullets.splice(index, 1);
-        }
-      });
-
-      fragmentAsteroids.forEach(function(asteroid) {
-        var index = game.asteroids.indexOf(asteroid);
-        var newAsteroids = game.spawnBabies(asteroid);
-        game.hits += 1;
-        game.asteroids = game.asteroids.concat(newAsteroids);
-        newAsteroids.forEach(function(ast) {
-          game.scene.add(ast.object);
-        })
-        game.asteroids.splice(index, 1);
-        game.scene.remove(asteroid.object);
       });
     };
+
+    Game.prototype.removeDeadObjects = function(){
+      var game = this
+      this.bullets.forEach( function(bullet) {
+        if (bullet.lifespan <= 0) {
+          game.destroyBullet(bullet);
+        }
+      });
+
+      this.explosions.forEach( function(explosion) {
+        if (explosion.lifespan <= 0) {
+          game.scene.remove(explosion.object);
+          var index = game.explosions.indexOf(explosion);
+          if (index !== -1) {
+            game.explosions.splice(index, 1);
+          }
+        }
+      });
+    };
+
+    Game.prototype.destroyBullet = function(bullet){
+      var index = this.bullets.indexOf(bullet);
+      this.scene.remove(bullet.object);
+      if (index !== -1) {
+        this.bullets.splice(index, 1);
+      }
+    };
+
+    Game.prototype.destroyAsteroid = function(asteroid){
+      //handles absolute destruction of asteroids with no fragmenting
+      var index = this.asteroids.indexOf(asteroid);
+      this.asteroids.splice(index, 1);
+      this.scene.remove(asteroid.object);
+      this.addExplosion(asteroid, true);
+    };
      
+    Game.prototype.fragmentAsteroid = function(asteroid){
+      //for when asteroids fragment upon death
+      var game = this;
+      var index = game.asteroids.indexOf(asteroid);
+      var newAsteroids = game.spawnBabies(asteroid);
+      game.hits += 1;
+      game.asteroids = game.asteroids.concat(newAsteroids);
+      newAsteroids.forEach(function(ast) {
+        game.scene.add(ast.object);
+      })
+      game.asteroids.splice(index, 1);
+      game.scene.remove(asteroid.object);
+    };
+
     Game.prototype.createInfo = function (object) {
       $('#description').remove();
       var div = document.createElement('div');
@@ -313,33 +363,35 @@
       $(div2).html(object.description);
       $(div).html(div2);
       $('body').append(div);
-      var pos = toScreenXY( object.object.position, this.camera, $('body'));
+      //code for placing info using positions of three.js objects-current version centers camera focus on object instead.
+      // var pos = toScreenXY( object.object.position, this.camera, $('body'));
       $(div).css({
-        top: pos[1] + 10,
-        left: pos[0]
+        top:  window.innerHeight/2,
+        left: window.innerWidth/2 + 40
       });
-    }
+    };
     
     Game.prototype.mark = function(object){
-      if (object.object.material.emissive !== 0xff0000){
-        object.currentHex = object.object.material.emissive.getHex();
-      }
-      object.object.material.emissive.setHex( 0xff0000 );
-
+      object.highLight();
       var pos = toScreenXY( object.object.position, this.camera, $('body'));
       this.focusPoints = panArray(object.object.position, this.focusPoints[this.focusPoints.length-1]);
       this.paused = true;
-    } 
+    } ;
 
     Game.prototype.unmark = function(object){
-      this.camera.lookAt( this.scene.position );
-      object.object.material.emissive.setHex( object.currentHex );
+      object.unhighLight();
       $('#description').remove();
       this.focusPoints = panArray(this.sun.object.position, this.focusPoints[this.focusPoints.length-1]);
       this.paused = false;
-      // this.animate();
-    }
+    };
   
+
+    //ship collisions disabled
+    // Game.prototype.gameOver = function() {
+    //   key.unbind('space, up, left, right');
+    // }
+
+    // broken and low priority- not interesting
     // Game.prototype.onWindowResize = function() {
     //   this.camera.aspect = window.innerWidth / window.innerHeight;
     //   this.camera.updateProjectionMatrix();
@@ -347,14 +399,14 @@
     //   this.composer.reset();
     // }
 
+    // mouse position in browser
     // Game.prototype.onDocumentMouseMove = function( event ) {
     //   event.preventDefault();
     //   this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     //   this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     // }
     
-    //deprecated functionality to check if mousing over 3d rendered objects
-    //might be useful later
+    //check for clicks on canvas objects
     // Game.prototype.onDocumentMouseDown = function( event ) {
     //   event.preventDefault();   
     //   if(this.INTERSECTED){
@@ -362,6 +414,7 @@
     //   }
     // }
     
+    // casts a ray straight into screen from mouse position into screen and returns intersected objects
     // Game.prototype.checkIntersects = function(){
     //   var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
     //   projector.unprojectVector( vector, camera );
@@ -369,16 +422,13 @@
     //   var intersects = raycaster.intersectObjects( scene.children );
     //   return intersects;
     // }
-    
 
+    // does some stuff to intersected objects. Probably useless and definitely would need refactoring
     // Game.prototype.intersectBehaviour= function(intersects){
-  
     //   if ( intersects.length > 0 ) {        
-    
     //     if ( INTERSECTED != intersects[ 0 ].object ) {
     //       $("a").removeClass("highlighted");
     //       $('#description').remove();
-      
     //       if ( INTERSECTED ) 
     //       INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
     //       INTERSECTED = intersects[ 0 ].object;
@@ -388,12 +438,10 @@
     //       createInfo(INTERSECTED);
     //     }
     //   } else {
-    
     //     if ( INTERSECTED ) 
     //     INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
     //     $("a").removeClass("highlighted");
     //     INTERSECTED = null;
-
     //   }
     // }
   })(this);

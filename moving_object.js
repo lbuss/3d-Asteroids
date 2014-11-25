@@ -14,12 +14,19 @@
     this.object.position.z = options.pos[1];
     this.object.position.y = options.pos[2];
     this.vel = options.vel;
+    this.currentHex = this.object.material.emissive.getHex();
+
+    //enable explosion opacity setting
+    if(options.explosion === true){
+      this.object.material.transparent = true;
+    }
   };
   
   MovingObject.prototype.isCollidedWith = function(obj) {
     var point1=this.object.position;
     var point2=obj.object.position;
-    return pointDistanceHash(point1, point2) < (this.object.radius + obj.object.radius);
+    var collisionAdjust = Math.min(this.object.radius, obj.object.radius)/2
+    return pointDistanceHash(point1, point2) < Math.max(this.object.radius, obj.object.radius) + collisionAdjust;
   };
   
   MovingObject.prototype.move = function (grav) {
@@ -33,4 +40,13 @@
       this.vel[2] += grav[2]/this.mass;
     }
   };
+
+  MovingObject.prototype.highLight = function(){
+    this.object.material.emissive.setHex( 0xff0000 );
+  }
+
+  MovingObject.prototype.unhighLight = function(){
+    this.object.material.emissive.setHex( this.currentHex );
+  }
+  
 })(this);
