@@ -131,9 +131,23 @@
 
     light = new THREE.PointLight( 0xffffff, 2, 0);
     this.scene.add( light );
-    
-    this.sun = new Asteroids.Asteroid({pos:[0,0,0], vel:[0,0,0] , radius: 400, color: '#FFCC33', emissive: 0xCCFF66 });
-    
+
+    var radius = 400;
+
+    var imgTexture = THREE.ImageUtils.loadTexture( "sun.jpg" );
+    imgTexture.wrapS = imgTexture.wrapT = THREE.RepeatWrapping;
+    imgTexture.anisotropy = 16;
+
+    var shininess = 10, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
+
+    var material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, color: '#FFCC33', specular: specular, shininess: shininess, shading: shading, emissive: 0xCCFF66 });
+    var geometry = new THREE.SphereGeometry( radius, 32, 16 );
+    // var material = new THREE.MeshLambertMaterial( { color: '#FFCC33', emissive: 0xCCFF66 } );
+
+    this.sun = new Asteroids.MovingObject({pos:[0,0,0], vel:[0,0,0], geometry: geometry, material: material, radius: radius});
+    this.sun.radius = radius;
+    this.sun.mass = radius * radius;
+
     this.scene.add(this.sun.object);
   }
   
@@ -213,6 +227,7 @@
       var exp = new Asteroids.Explosion(options);
       this.explosions.push(exp);
       this.scene.add(exp.object);
+      // this.scene.add(exp.light);
       return exp;
     };
 
@@ -234,9 +249,9 @@
           radius = asteroid.object.radius/(Math.random()+1.5);
           ratio = asteroid.object.radius/radius;
 
-          var velX = asteroid.vel[0] * (1 + Math.random()-.5);
-          var velY = asteroid.vel[1] * (1 + Math.random()-.5);
-          var velZ = asteroid.vel[2] * (1 + Math.random()-.5);
+          var velX = asteroid.vel[0] + (16 * (Math.random()-.5));
+          var velY = asteroid.vel[1] + (16 * (Math.random()-.5));
+          var velZ = asteroid.vel[2] + (16 * (Math.random()-.5));
 
           var posX = asteroid.object.position.x + (asteroid.object.radius * Math.random()-.5);
           var posY = asteroid.object.position.y + (asteroid.object.radius * Math.random()-.5);
@@ -268,9 +283,9 @@
       
       key('f', function() {
         switch(game.view){
-          case 0: game.view = 1; $('.infoWrap').hide(); break;
+          case 0: game.view = 1; game.htmlChanger.shipView(); game.htmlChanger.updateCount(game.hits); break;
           
-          case 1: game.view = 0; $('.infoWrap').show(); game.camera.position.set(-1600, 1600, 1600); break;
+          case 1: game.view = 0; game.htmlChanger.spaceView(); game.camera.position.set(-1600, 1600, 1600); break;
         }
       });
 
@@ -288,7 +303,7 @@
         bullet.move();
       });
       this.explosions.forEach(function(explosion) {
-        explosion.move();
+        explosion.move(gravityVector(explosion, game.sun));
       });
 
     };
@@ -305,6 +320,10 @@
         //     // game.gameOver();
         //   }
         // }
+        if (Math.abs(pointDistanceHash(asteroid.object.position, game.sun.object.position)) > 25000){
+            game.destroyAsteroid(asteroid);
+            return;
+        }
 
         if (asteroid.isCollidedWith(game.sun)) {
             game.destroyAsteroid(asteroid);
@@ -319,9 +338,11 @@
           } 
           
           if (bullet.isCollidedWith(asteroid)) {
+            game.hits += 1;
+            game.htmlChanger.updateCount(game.hits)
             game.destroyBullet(bullet);
             game.fragmentAsteroid(asteroid);
-            game.addExplosion(bullet, true, bullet.object.radius*(1 + .5 * Math.random()));
+            game.addExplosion(bullet, true, bullet.object.radius*(3 + .5 * Math.random()));
           } 
         });
       });
@@ -338,6 +359,7 @@
       this.explosions.forEach( function(explosion) {
         if (explosion.lifespan <= 0) {
           game.scene.remove(explosion.object);
+          // game.scene.remove(explosion.light);
           var index = game.explosions.indexOf(explosion);
           if (index !== -1) {
             game.explosions.splice(index, 1);
@@ -367,7 +389,6 @@
       var game = this;
       var index = game.asteroids.indexOf(asteroid);
       var newAsteroids = game.spawnBabies(asteroid);
-      game.hits += 1;
       game.asteroids = game.asteroids.concat(newAsteroids);
       newAsteroids.forEach(function(ast) {
         game.scene.add(ast.object);
@@ -413,36 +434,47 @@
     //check for clicks on canvas objects
     Game.prototype.onDocumentMouseDown = function( event ) {
       // event.preventDefault();
-      var intersect = this.checkIntersects();   
-      if(intersect){
-        if (intersect.text){
-          this.intersected = intersect
-          this.linkHover(intersect);
-        } else {
-          if(intersect != this.sun && intersect != this.ship){
-            this.fragmentAsteroid(intersect);
-          }
-        }
-        // openInNewTab(this.INTERSECTED.link);
-      } else {
+      if(this.view === 0){
+        var intersect = this.checkIntersects();
+
         if(this.intersected){
           this.linkUnhover(this.intersected);
           this.unpause();
           this.focusOnObject(this.sun);
           this.intersected = null;
-        }
+        }  
+
+        if(intersect){
+          if (intersect.text){
+            this.intersected = intersect
+            this.linkHover(intersect);
+          } else {
+            if(intersect.className === "asteroid"){
+              this.fragmentAsteroid(intersect);
+              this.addExplosion(intersect, false);
+            }
+          }
+          // openInNewTab(this.INTERSECTED.link);
+        } 
       }
-    }
+    };
     
-    // casts a ray straight into screen from mouse position into screen and returns intersected objects
+    // casts a ray straight into screen from mouse position into screen and returns first intersected asteroid
     Game.prototype.checkIntersects = function(){
       var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 1 );
       this.projector.unprojectVector( vector, this.camera );
       this.raycaster.set( this.camera.position, vector.sub( this.camera.position ).normalize() );
       var intersects = this.raycaster.intersectObjects( this.scene.children );
-      if(intersects[0]){
-        return intersects[0].object.container;
+
+      var i = 0;
+      while(i < (intersects.length)){
+        if (intersects[i].object.container.className === "asteroid"){
+          return intersects[i].object.container;
+        }
+        i++;
       }
+      return null;
+      
     }
 
     // // does some stuff to intersected objects. Probably useless and definitely would need refactoring

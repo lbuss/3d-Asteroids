@@ -11,7 +11,8 @@
     this.object.position.z = options.pos[1];
     this.object.rotation.z = Math.PI/2;
     this.mass = 20;
-    
+    this.className = "ship";
+
     this.vel = options.vel;
     // Asteroids.MovingObject.call(this, pos, vel, 10, '#FF00FF');
     

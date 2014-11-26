@@ -28,18 +28,32 @@
 	htmlChanger.prototype.removeInfo = function(){
 		$('#description').remove();
 		this.showInfo = false;
-	}
+	};
 
 	htmlChanger.prototype.appendLink = function(object){
 		$('#linksWrap').append("<br><a href="+object.link+" target='_blank' id="+object.divName+">"+object.text+"</a><br>");
-	}
+	};
 
 	htmlChanger.prototype.highlightLink = function(object){
-		$('#'+object.divName).addClass("highlighted")
-	}
+		$('#'+object.divName).addClass("highlighted");
+	};
 
 	htmlChanger.prototype.unhighlightLink = function(object){
-		$('#'+object.divName).removeClass("highlighted")
+		$('#'+object.divName).removeClass("highlighted");
+	};
+
+	htmlChanger.prototype.shipView = function(){
+		$('#spaceView').hide();
+		$('#hud').show();
+	};
+
+	htmlChanger.prototype.spaceView = function(){
+		$('#spaceView').show();
+		$('#hud').hide();
+	};
+
+	htmlChanger.prototype.updateCount = function(number){
+		$('#countWrap').html("asteroids destroyed: " + number);
 	}
 
  })(this);

@@ -6,8 +6,20 @@
   var Asteroid = Asteroids.Asteroid = function(options) {
 
     this.mass = options.mass || options.radius*options.radius;
+    this.className = "asteroid";
 
-    options.emissive = options.emissive || 0x080808;
+    var imgTexture = THREE.ImageUtils.loadTexture( "asteroid.jpeg" );
+    imgTexture.wrapS = imgTexture.wrapT = THREE.RepeatWrapping;
+    imgTexture.anisotropy = 16;
+
+    var color = options.color || Math.random() * 0xffffff;
+
+    var shininess = 10, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
+
+    options.material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, color: color, specular: specular, shininess: shininess, shading: shading });
+    options.geometry = new THREE.SphereGeometry( options.radius, 32, 16 );
+
+    // options.ambient = options.ambient || 0x080808;
     
     Asteroids.MovingObject.call(this, options);
   };
@@ -26,7 +38,7 @@
 
     var x = startDist * Math.cos(angle);
     var y = startDist * Math.sin(angle);
-    var z = plusOrMinus * 50 * Math.random();
+    var z = plusOrMinus * 300 * Math.random();
 
     var velMag = Math.sqrt((sun.mass+mass)/startDist);
 

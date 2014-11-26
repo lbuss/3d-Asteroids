@@ -7,8 +7,9 @@
   var MovingObject = Asteroids.MovingObject = function(options){
 
     var color = options.color || Math.random() * 0xffffff;
-    var geometry = new THREE.SphereGeometry( options.radius, 10, 10 );
-    this.object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: color, emissive: options.emissive } ) );
+
+    this.object = new THREE.Mesh(options.geometry, options.material);
+    
     this.object.radius = options.radius;
     this.object.position.x = options.pos[0];
     this.object.position.z = options.pos[1];
@@ -18,7 +19,7 @@
     this.object.container = this;
 
     //enable explosion opacity setting
-    if(options.explosion === true){
+    if(this.className === "explosion"){
       this.object.material.transparent = true;
     }
   };
