@@ -14,11 +14,16 @@
 
     var color = options.color || Math.random() * 0xffffff;
 
-    var shininess = 10, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
+    var shininess = 0, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
 
-    options.material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, color: color, specular: specular, shininess: shininess, shading: shading });
+    options.material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, emissive: 0x111111, color: color, specular: specular, shininess: shininess, shading: shading });
     options.geometry = new THREE.SphereGeometry( options.radius, 32, 16 );
 
+    var spinX = Math.random() * Math.PI;
+    var spinY = Math.random() * Math.PI;
+    var spinZ = Math.random() * Math.PI;
+
+    options.spin = [spinX, spinY, spinZ];
     // options.ambient = options.ambient || 0x080808;
     
     Asteroids.MovingObject.call(this, options);

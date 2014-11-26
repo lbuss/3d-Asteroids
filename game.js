@@ -63,8 +63,8 @@
     
     var game = this;
     
-    $('#ship').hover(function(){game.linkHover(game.ship)}, function(){game.linkUnhover(game.ship)});
     this.htmlChanger.appendLink(this.ship);
+    $('#ship').hover(function(){game.linkHover(game.ship)}, function(){game.linkUnhover(game.ship)});
 
     this.scene.add( this.ship.object );
     
@@ -132,6 +132,8 @@
     light = new THREE.PointLight( 0xffffff, 2, 0);
     this.scene.add( light );
 
+    // this.sun = new Asteroids.Sun();
+
     var radius = 400;
 
     var imgTexture = THREE.ImageUtils.loadTexture( "sun.jpg" );
@@ -140,15 +142,18 @@
 
     var shininess = 10, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
 
-    var material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, color: '#FFCC33', specular: specular, shininess: shininess, shading: shading, emissive: 0xCCFF66 });
+    var material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, specular: specular, shininess: shininess, shading: shading, emissive: 0xFFFF99 });
     var geometry = new THREE.SphereGeometry( radius, 32, 16 );
     // var material = new THREE.MeshLambertMaterial( { color: '#FFCC33', emissive: 0xCCFF66 } );
 
-    this.sun = new Asteroids.MovingObject({pos:[0,0,0], vel:[0,0,0], geometry: geometry, material: material, radius: radius});
-    this.sun.radius = radius;
-    this.sun.mass = radius * radius;
+    this.sun = new Asteroids.Sun()
+
+    // this.sun = new Asteroids.MovingObject({pos:[0,0,0], vel:[0,0,0], geometry: geometry, material: material, radius: radius});
+    // this.sun.radius = radius;
+    // this.sun.mass = radius * radius;
 
     this.scene.add(this.sun.object);
+    this.scene.add(this.sun.glow);
   }
   
   Game.prototype.animate = function() {

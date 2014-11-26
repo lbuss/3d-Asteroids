@@ -9,7 +9,7 @@
     var color = options.color || Math.random() * 0xffffff;
 
     this.object = new THREE.Mesh(options.geometry, options.material);
-    
+
     this.object.radius = options.radius;
     this.object.position.x = options.pos[0];
     this.object.position.z = options.pos[1];
@@ -19,6 +19,12 @@
     this.object.container = this;
 
     //enable explosion opacity setting
+    if(this.className === "asteroid"){
+      this.object.rotation.x = options.spin[0];
+      this.object.rotation.y = options.spin[1];
+      this.object.rotation.z = options.spin[2];
+    }
+
     if(this.className === "explosion"){
       this.object.material.transparent = true;
     }
