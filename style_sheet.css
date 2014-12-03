@@ -1,9 +1,67 @@
-.highlighted {
-  background-color: green;
-  color: black;
+.clean {
+  background-color: #000;
+ /* background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #000), color-stop(100%, #000));
+  background-image: -webkit-linear-gradient(top,  #339933, #006600);
+  background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: -ms-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: -o-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: linear-gradient(top, #eeeeee, #cccccc);*/
+  background: rgba(0,120,0,0.5);
+  border: 0px;
+  border-bottom: 1px solid #000;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  color: rgba(40,160,40,1);
+  font: 11px Verdana, sans-serif;
+  line-height: 1;
+  padding: 8px;
+  text-align: center;
+  text-shadow: 0 1px 0 #020;
+  width: 150px;
+  margin: 10px;
 }
 
-#controls {
+.clean:hover {
+  background-color: #dddddd;
+  /*background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dddddd), color-stop(100%, #bbbbbb));
+  background-image: -webkit-linear-gradient(top, #ccddcc, #aaddaa);
+  background-image: -moz-linear-gradient(top, #ccddcc, #aaddaa);
+  background-image: -ms-linear-gradient(top, #ccddcc, #aaddaa);
+  background-image: -o-linear-gradient(top, #ccddcc, #aaddaa);
+  background-image: linear-gradient(top, #ccddcc, #aaddaa);*/
+  background: rgba(10,140,10,0.6);
+  border: 0px;
+  border-bottom: 1px solid #000;
+  cursor: pointer;
+  text-shadow: 0 1px 0 #252; 
+}
+
+.clean:active {
+  border: 0px;
+  border-bottom: 1px solid #000;
+  -webkit-box-shadow: inset 0 0 5px 2px #003300, 0 0px 0 0 #006600;
+  -moz-box-shadow: inset 0 0 5px 2px #003300, 0 0px 0 0 #006600;
+  box-shadow: inset 0 0 5px 2px #003300, 0 0px 0 0 #006600; 
+}
+
+.title{
+  color: rgba(40,160,40,1);
+  background: rgba(0,120,0,0.5);
+  /*border-radius: 3px;*/
+  text-shadow: 0 1px 0 #020;
+  margin-left: 0px;
+  margin-right: 0px;
+  padding: 5px;
+}
+
+/*.highlighted {
+
+  background-color: green;
+  color: black;
+}*/
+
+/*#about {
   position: absolute;
   width:400px;
   margin-left:-200px;
@@ -11,33 +69,42 @@
   left:50%;
   
   text-align: center;
-}
+
+  
+}*/
 
 #links {
   /*border-style: solid;
   border-color: green;
   border-width: 1px;*/
   position: absolute;
-  top: 40%;
+  top: 30%;
   width: 100%;
-  left: 2%;
+  right: 160px;
+  width: 40px;
   
-  text-align: left;
+  text-align: center;
+
+  
+  -webkit-transform: skewY(10deg);
 }
 
-#about {
+.controls {
   position: absolute;
-  top: 40%;
+  top: 30%;
   width: 100%;
-  right: 130px;
-  width: 40px;
+  left: 2%;
+  max-width: 200px;
+  
   text-align: center;
+
+  -webkit-transform: skewY(-10deg);
 }
 
 #description{
   position: absolute;
   text-align: center;
-  max-width: 100px;
+  max-width: 130px;
 }
 
 #count{
@@ -50,24 +117,27 @@
   text-align: center;
 }
 
-#circle {
-    width: 50px;
-    height: 50px;
-    -webkit-border-radius: 25px;
-    -moz-border-radius: 25px;
-    border-radius: 25px; 
-}
-
 .infoWrap {
-  padding: 5px;
+  padding: 0px;
   display: inline-block;
-  outline: 1px solid green;
-  background-color: rgba(0, 0, 0, .8);
+  /*outline: 1px solid green;*/
+  background-color: rgba(0, 30, 0, .6);
+
+  border-width: 2px;
+  border-style: solid;
+  border-color: #476B6B;
+  /*-webkit-border-radius: 5px;
+  -moz-border-radius: 5px;*/
+  border-radius: 5px; 
 }
 
 a{
   color: green;
   text-decoration: none;
+}
+
+p{
+  margin: 10px;
 }
 
 a:hover{
@@ -78,7 +148,53 @@ a:hover{
 body {
   color: green;
   font-family: Monospace;
-  background-color: green;
+  font: 13px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+  background-color: black;
   margin: 0px;
   overflow: hidden;
+}
+
+/*collapsing menu css*/
+
+.list {
+    display:none; 
+    height:auto;
+}
+.show {
+    display: none; 
+}
+.hide:target + .show {
+    display: inline; 
+}
+.hide:target {
+    display: none; 
+}
+.hide:target ~ .list {
+    display:inline; 
+}
+
+/*style the (+) and (-) buttons */
+.hide, .show {
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: 1px 1px 2px #000;
+  float: center;
+  padding:0px;
+
+}
+
+/*.hide:hover, .show:hover {
+  color: #eee;
+  text-shadow: 0 0 1px #666;
+  text-decoration: none;
+  box-shadow: 0 0 4px #222 inset;
+  opacity: 1;
+  margin-bottom: 25px;
+}*/
+
+.list p{
+    height:auto;
+    margin:0;
 }

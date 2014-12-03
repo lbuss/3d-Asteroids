@@ -11,13 +11,16 @@
 	  $('#description').remove();
 	  var div = document.createElement('div');
 	  var div2 = document.createElement('div');
+	  var par = document.createElement('p');
+	  var button = document.createElement('button');
 	  $(div).attr('id', 'description');
 	  $(div2).addClass('infoWrap');
-	  $(div2).html(object.description);
+	  $(par).html(object.description);
+	  $(par).append("<br><br>");
+	  $(par).append("<a href="+object.link+" target='_blank' class='clean' id="+object.divName+"1>Launch</a>");
+	  $(div2).html(par);
 	  $(div).html(div2);
 	  $('body').append(div);
-	  //code for placing info using positions of three.js objects-current version centers camera focus on object instead.
-	  // var pos = toScreenXY( object.object.position, this.camera, $('body'));
 	  $(div).css({
 	    top:  window.innerHeight/2,
 	    left: window.innerWidth/2 + 40
@@ -31,16 +34,16 @@
 	};
 
 	htmlChanger.prototype.appendLink = function(object){
-		$('#linksWrap').append("<br><a href="+object.link+" target='_blank' id="+object.divName+">"+object.text+"</a><br>");
+		$('#linkList').append("<button type='button' class='clean' id="+object.divName+">"+object.text+"</button><br>");
 	};
 
-	htmlChanger.prototype.highlightLink = function(object){
-		$('#'+object.divName).addClass("highlighted");
-	};
+	// htmlChanger.prototype.highlightLink = function(object){
+	// 	$('#'+object.divName).addClass("highlighted");
+	// };
 
-	htmlChanger.prototype.unhighlightLink = function(object){
-		$('#'+object.divName).removeClass("highlighted");
-	};
+	// htmlChanger.prototype.unhighlightLink = function(object){
+	// 	$('#'+object.divName).removeClass("highlighted");
+	// };
 
 	htmlChanger.prototype.shipView = function(){
 		$('#spaceView').hide();
@@ -53,7 +56,7 @@
 	};
 
 	htmlChanger.prototype.updateCount = function(number){
-		$('#countWrap').html("asteroids destroyed: " + number);
+		$('#countWrap').html(" Asteroids destroyed: " + number + " ");
 	}
 
  })(this);

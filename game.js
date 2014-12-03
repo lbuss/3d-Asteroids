@@ -50,6 +50,7 @@
     this.createPlanets();
     this.createShip();
     this.bindKeyHandlers();
+    this.htmlChanger.spaceView();
     this.animate();
   };
   
@@ -57,14 +58,14 @@
     var object = this.addAsteroid();
     
     this.ship = new Asteroids.Ship({pos: [2000, 0, 0], vel: [0, 0, 0]});
-    this.ship.text = 'Reset Page';
+    this.ship.text = 'Pilot the Ship';
     this.ship.description = 'Take on the asteroids! Read controls at top of screen';
     this.ship.divName = 'ship';
     
     var game = this;
     
     this.htmlChanger.appendLink(this.ship);
-    $('#ship').hover(function(){game.linkHover(game.ship)}, function(){game.linkUnhover(game.ship)});
+    $('#ship').click(function(){game.view = 1; game.htmlChanger.shipView();game.deselectObject(); game.htmlChanger.updateCount(game.hits)});
 
     this.scene.add( this.ship.object );
     
@@ -101,9 +102,8 @@
         object.description = descriptions[i];
         object.divName = 'link'+i;
         
-
         game.htmlChanger.appendLink(object);
-        $("#"+object.divName).hover(function(){game.linkHover(object)}, function(){game.linkUnhover(object)});
+        $("#"+object.divName).click(function(){game.linkHover(object); game.intersected = object});
       })();
     }
   }
@@ -114,7 +114,7 @@
     game.focusOnObject(object);
     object.highLight();
     game.htmlChanger.createInfo(object);
-    game.htmlChanger.highlightLink(object);
+    // game.htmlChanger.highlightLink(object);
   }
 
   Game.prototype.linkUnhover = function(object){
@@ -122,17 +122,31 @@
     object.unhighLight();
     game.focusOnObject(game.sun);
     game.htmlChanger.removeInfo();
-    game.htmlChanger.unhighlightLink(object);
+    // game.htmlChanger.unhighlightLink(object);
     game.unpause();
   }
   
   Game.prototype.createSolarSystem = function() {
     this.scene.add( new THREE.AmbientLight( 0x101000  ) );
 
-    light = new THREE.PointLight( 0xffffff, 2, 0);
+    light = new THREE.PointLight( 0xffffff, 2, 10000);
     this.scene.add( light );
 
     // this.sun = new Asteroids.Sun();
+    var spacetex = THREE.ImageUtils.loadTexture("space.jpg");
+    var spacesphereGeo = new THREE.SphereGeometry(20000,20,20);
+    var spacesphereMat = new THREE.MeshBasicMaterial({emissive: 0x111111, map: spacetex});
+
+    var spacesphere = new THREE.Mesh(spacesphereGeo,spacesphereMat);
+    spacesphere.material.side = THREE.DoubleSide;
+  
+    spacesphere.material.map.wrapS = THREE.RepeatWrapping; 
+    spacesphere.material.map.wrapT = THREE.RepeatWrapping;
+    spacesphere.material.map.repeat.set( 4, 2);
+    spacesphere.container = {};
+    spacesphere.container.className = "SpaceSphere"
+
+    this.scene.add(spacesphere);
 
     var radius = 400;
 
@@ -436,18 +450,22 @@
       // this.intersectBehaviour(this.checkIntersects());
     }
     
+    Game.prototype.deselectObject = function(){
+      if(this.intersected){
+        this.linkUnhover(this.intersected);
+        this.unpause();
+        this.focusOnObject(this.sun);
+        this.intersected = null;
+      }
+    }
+
     //check for clicks on canvas objects
-    Game.prototype.onDocumentMouseDown = function( event ) {
+    Game.prototype.onDocumentMouseDown = function( event ){
       // event.preventDefault();
       if(this.view === 0){
         var intersect = this.checkIntersects();
 
-        if(this.intersected){
-          this.linkUnhover(this.intersected);
-          this.unpause();
-          this.focusOnObject(this.sun);
-          this.intersected = null;
-        }  
+        this.deselectObject();
 
         if(intersect){
           if (intersect.text){

@@ -46,32 +46,57 @@
 
 <body>
   <div id="container">
-    
+    <!-- <div class='FAQ'>
+      <a href="#hide1" class="hide" id="hide1">+</a>
+      <a href="#show1" class="show" id="show1">-</a>
+      <div class="question"> 
+          Question Question Question Question Question Question Question Question Question Question Question? 
+      </div>
+      <div class="list">
+            <p>Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer Answer </p>
+      </div>
+    </div> -->
+
     <div id="spaceView">
       <div id="links">
         <div id="linksWrap" class="infoWrap">
-          My Work<br>
+          <a href="#hide1" class="hide clean" id="hide1"><h3 class="title">Destinations +</h3></a>
+          <a href="#show1" class="show clean" id="show1"><h3 class="title">Destinations -</h3></a>
+
+          <div id="linkList" class="list">
+          </div>
         </div>
       </div>
 
-      <div id="about">
-        <div id="aboutWrap" class="infoWrap">
-          About Me<br><br>
-          I am a rails/javascript developer looking for work in the Bay Area. Contact me at LawSBuss@gmail.com or check out my github at <a href="https://github.com/lbuss" target="_blank">github.com/lbuss</a>
-        </div>
-      </div>
-        
-      <div id="controls">
+      <div class="controls">
         <div id="controlsWrap" class="infoWrap">
-          scroll in and out with mousewheel<br>
-          click and drag to rotate the view<br>
-          press 'f' to toggle ship view and 3rd person<br>
-          arrows and space move the ship and shoot<br>
-          click on asteroids in third person<br>
-          'a' spawns more asteroids!<br>
+          <a href="#hide2" class="hide clean" id="hide2"><h3 class="title">Controls +</h3></a>
+          <a href="#show2" class="show clean" id="show2"><h3 class="title">Controls -</h3></a>
+
+
+          <div class="list">
+            <p>
+              &bull; Scroll in and out with mousewheel<br><br>
+              &bull; Click and drag to rotate the view<br><br>
+              &bull; Press 'f' to toggle ship view and 3rd person<br><br>
+              &bull; Arrows and space move the ship and shoot<br><br>
+              &bull; Click on asteroids in third person<br><br>
+              &bull; 'a' spawns more asteroids!<br><br>
+            </p>
+          </div>
         </div>
       </div>
+
     </div>
+        
+      <!-- <div id="about">
+        <div id="aboutWrap" class="infoWrap">
+          <p>
+            I am a rails/javascript developer looking for work in the Bay Area. Contact me at LawSBuss@gmail.com or check out my github at <a href="https://github.com/lbuss" target="_blank">github.com/lbuss</a>
+          </p>
+        </div>
+      </div>
+    </div> -->
 
 
     <div id="hud">
@@ -79,8 +104,21 @@
         <div id="countWrap" class="infoWrap">
         </div>
       </div>
+
+      <div class="controls">
+        <div id="shipSontrolsWrap" class="infoWrap">
+          <h3>Ship Controls Manual</h3>
+          <p>
+            &bull; Press 'f' to toggle ship view and 3rd person<br><br>
+            &bull; Arrows and space move the ship and shoot<br><br>
+            &bull; Click on asteroids in third person<br><br>
+            &bull; 'a' spawns more asteroids!<br>
+          </p>
+        </div>
+      </div>
     </div>
-  </div>
+
+    
   <script>
     var g = new Asteroids.Game();
     g.start();
