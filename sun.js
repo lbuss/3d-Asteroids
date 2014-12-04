@@ -21,6 +21,7 @@
     // this.object = new Asteroids.MovingObject({pos:[0,0,0], vel:[0,0,0], geometry: options.geometry, material: options.material, radius: radius});
     this.radius = radius;
     this.mass = radius * radius;
+    this.className = "Sun";
 
     options.radius = radius;
     options.vel = [0,0,0];
@@ -65,6 +66,7 @@
     this.glow = new THREE.Mesh( options.geometry.clone(), customMaterial );
     this.glow.position = this.object.position;
     this.glow.scale.multiplyScalar(1.2);
+    this.glow.container = this;
   };
   
   Sun.inherits(Asteroids.MovingObject);

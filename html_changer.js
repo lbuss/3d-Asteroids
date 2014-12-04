@@ -23,7 +23,7 @@
 	  $('body').append(div);
 	  $(div).css({
 	    top:  window.innerHeight/2,
-	    left: window.innerWidth/2 + 40
+	    right: '55%'
 	  });
 	  this.showInfo = true;
 	};
@@ -56,7 +56,7 @@
 	};
 
 	htmlChanger.prototype.updateCount = function(number){
-		$('#countWrap').html(" Asteroids destroyed: " + number + " ");
+		$('#countWrap').html("<p>Asteroids destroyed: " + number + "</p>");
 	}
 
  })(this);

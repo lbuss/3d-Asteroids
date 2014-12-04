@@ -40,7 +40,7 @@
     var game = this;
    
     document.addEventListener( 'mousemove', this.onDocumentMouseMove.bind(this), false);
-    document.addEventListener( 'mousedown', this.onDocumentMouseDown.bind(this), false);
+    document.addEventListener( 'mouseup', this.onDocumentMouseUp.bind(this), false);
     // window.addEventListener( 'resize', this.onWindowResize, false );
     $('#description').remove();
   };
@@ -460,9 +460,11 @@
     }
 
     //check for clicks on canvas objects
-    Game.prototype.onDocumentMouseDown = function( event ){
+    Game.prototype.onDocumentMouseUp = function( event ){
       // event.preventDefault();
-      if(this.view === 0){
+      if(event.target.href){
+        openInNewTab(event.target.href);
+      }else if(this.view === 0){
         var intersect = this.checkIntersects();
 
         this.deselectObject();
