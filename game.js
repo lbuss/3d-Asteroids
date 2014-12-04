@@ -133,7 +133,7 @@
     this.scene.add( light );
 
     // this.sun = new Asteroids.Sun();
-    var spacetex = THREE.ImageUtils.loadTexture("space.jpg");
+    var spacetex = THREE.ImageUtils.loadTexture("http://codelab.nfshost.com/asteroids_super_3d/space.jpg");
     var spacesphereGeo = new THREE.SphereGeometry(20000,20,20);
     var spacesphereMat = new THREE.MeshBasicMaterial({emissive: 0x111111, map: spacetex});
 
@@ -172,6 +172,7 @@
   
   Game.prototype.animate = function() {
     if(this.paused === false){
+      this.sun.update();
       this.checkCollisions();
       this.removeDeadObjects();
       this.move();
@@ -461,9 +462,9 @@
 
     //check for clicks on canvas objects
     Game.prototype.onDocumentMouseUp = function( event ){
-      // event.preventDefault();
+      event.preventDefault();
       if(event.target.href){
-        openInNewTab(event.target.href);
+        // openInNewTab(event.target.href);
       }else if(this.view === 0){
         var intersect = this.checkIntersects();
 

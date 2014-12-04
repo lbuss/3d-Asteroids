@@ -8,7 +8,7 @@
     this.mass = options.mass || options.radius*options.radius;
     this.className = "asteroid";
 
-    var imgTexture = THREE.ImageUtils.loadTexture( "asteroid.jpeg" );
+    var imgTexture = THREE.ImageUtils.loadTexture( "http://codelab.nfshost.com/asteroids_super_3d/asteroid.jpeg" );
     imgTexture.wrapS = imgTexture.wrapT = THREE.RepeatWrapping;
     imgTexture.anisotropy = 16;
 

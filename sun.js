@@ -8,7 +8,7 @@
     var radius = 400;
     var options = {};
 
-    var imgTexture = THREE.ImageUtils.loadTexture( "sun.jpg" );
+    var imgTexture = THREE.ImageUtils.loadTexture( "http://codelab.nfshost.com/asteroids_super_3d/sun.jpg" );
     imgTexture.wrapS = imgTexture.wrapT = THREE.RepeatWrapping;
     imgTexture.anisotropy = 16;
 
@@ -22,6 +22,7 @@
     this.radius = radius;
     this.mass = radius * radius;
     this.className = "Sun";
+    this.timer = 0;
 
     options.radius = radius;
     options.vel = [0,0,0];
@@ -39,22 +40,19 @@
         }
     };
     
-
-    // var uniforms = {
-    //     amplitude: {
-    //         type: 'f', // a float
-    //         value: 0
-    //     }
-    // };
-    var uniforms = { 
+    this.uniforms = { 
             "c":   { type: "f", value: .2 },
             "p":   { type: "f", value: 3 },
             glowColor: { type: "c", value: new THREE.Color(0xffff00) },
-            viewVector: { type: "v3", value: window.g.camera.position }
+            viewVector: { type: "v3", value: window.g.camera.position },
+            // amplitude: {
+            //     type: 'f',
+            //     value: 1
+            // }
     };
 
     var customMaterial = new THREE.ShaderMaterial({
-        uniforms: uniforms,
+        uniforms: this.uniforms,
         attributes: attributes,
         vertexShader:   vShader.text(),
         fragmentShader: fShader.text(),
@@ -62,14 +60,40 @@
         blending: THREE.AdditiveBlending,
         transparent: true
     });
-        
+
+    // var vertices = options.geometry.vertices;
+    // var values = attributes.displacement.value;
+    // for(var v = 0; v < vertices.length; v++) {
+    //     if (Math.random()  < (.1 + Math.sin(2* Math.PI * v/vertices.length)/2)){
+    //         values.push(50 + Math.random() * 100);
+    //     } else{
+    //         values.push(0);
+    //     }
+    // }
+    // var glowGeometry = new THREE.SphereGeometry( radius, 64, 32 );
+
     this.glow = new THREE.Mesh( options.geometry.clone(), customMaterial );
+
     this.glow.position = this.object.position;
+    // this.glow.material.attributes.displacement.needsUpdate = true;
     this.glow.scale.multiplyScalar(1.2);
     this.glow.container = this;
+
   };
   
   Sun.inherits(Asteroids.MovingObject);
+
+  Sun.prototype.update = function(){
+    // debugger;
+    // this.uniforms.amplitude.value = 2 + 1 * Math.sin(this.timer);
+ 
+    // // debugger;
+    // this.timer += 0.5;
+    // if (this.timer > 2*Math.PI){
+    //     this.timer = 0;
+    // }
+    // set up the next call
+  }
   
 
 })(this);

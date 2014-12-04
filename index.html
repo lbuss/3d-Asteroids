@@ -22,11 +22,23 @@
     uniform float c;
     uniform float p;
     varying float intensity;
+    uniform float amplitude;
+    attribute float displacement;
     void main() 
     { 
+      //normalize vectors with normal matrix as they may be scaled funny
       vec3 vNormal = normalize( normalMatrix * normal );
       vec3 vNormel = normalize( normalMatrix * viewVector );
+
+      // (c - vector lengths * cos(angle between vectors))^p
+      // lengths are 1 since we normalized
+      // values set in sun.js where the glow object is defined; c=.2 p=3
       intensity = pow( c - dot(vNormal, vNormel), p );
+
+      //no modifying displacement of glow currently
+      // vec3 newPosition = position + normal * vec3(displacement * amplitude);
+      // vec3 newPosition = position + normal * vec3(displacement)
+      // gl_Position = projectionMatrix * modelViewMatrix *vec4( newPosition, 1.0);
       
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
