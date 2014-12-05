@@ -15,8 +15,11 @@
     this.object.position.z = options.pos[1];
     this.object.position.y = options.pos[2];
     this.vel = options.vel;
-    this.currentHex = this.object.material.emissive.getHex();
     this.object.container = this;
+
+    if(this.className != "sun"){
+      this.currentHex = this.object.material.emissive.getHex();
+    }
 
     //enable explosion opacity setting
     if(this.className === "asteroid"){
