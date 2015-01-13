@@ -32,7 +32,7 @@
     this.view = 0;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 70, width / height, 1, 60000 );
-    this.camera.position.set(-1600, 1600, 1600);
+    this.camera.position.set(-2500, 2500, 2500);
     this.focusPoints = [this.scene.position];
     this.camera.lookAt(this.scene.position);
 
@@ -43,6 +43,11 @@
     document.addEventListener( 'mouseup', this.onDocumentMouseUp.bind(this), false);
     // window.addEventListener( 'resize', this.onWindowResize, false );
     $('#description').remove();
+	
+	this.sounds = {};
+	this.sounds["boom"] = new Audio("/asteroids_super_3d/assets/boom.wav");
+	this.sounds["boom"].volume = 1;
+	this.sounds["boom"].load();
   };
   
   Game.prototype.start = function() {
@@ -76,20 +81,30 @@
   
   Game.prototype.createPlanets = function(){  
     var linkUrl = ["http://packoverflow.herokuapp.com",
+				   "http://lsb-trello-clone.herokuapp.com",
                    "/asteroids/index.html",
                    "/asteroids_3d/index.html",
                    "/old_stuff/chatScript.html",
-                   "https://docs.google.com/document/d/1ZCjbCzfN1mTdS_MAjaZOTTTyvWiMpByEbV54VDybdNg/pub"];
-    var linkName = ["packoverflow",
-                    "asteroids",
+				   "http://real-time-hang.herokuapp.com",
+                   "https://docs.google.com/document/d/1ZCjbCzfN1mTdS_MAjaZOTTTyvWiMpByEbV54VDybdNg/pub",
+			   	   "/"
+					];
+    var linkName = ["Packoverflow",
+				   	"Organizello",
+                    "Asteroids",
                     "3d asteroids",
-                    "PHP ChatApp", 
-                    "Resume"];
+                    "PHP ChatApp",
+				   	"Real-Time Hang",
+                    "Resume",
+					"Homepage"];
     var descriptions = ["PackOverflow is a loose clone of StackOverflow, built on Rails and Backbone. It demonstrates various aspects of database management and dynamic pages",
-    "Asteroids is a javascript/html5 game utilizing asynchronous event handling",
+    "Organizello is an organizational tool in the same vein as Trello, with a persistent drag and drop ui.",
+	"Asteroids is a javascript/html5 game utilizing asynchronous event handling.",
     "Asteroids 3d technical demo, left is fps view, right is top down. Arrows and space to control.",
-    "ChatApp is a simple javascript chat client handled by server-side PHP",
-    "It's my resume"
+    "ChatApp is a simple javascript chat client handled by server-side PHP.",
+	"Real-Time Hang is a real time hangman game with concurrent users. Minimal ui currently.",
+    "It's my resume.",
+	"Back to my homepage."
     ];   
 
     var game = this;
@@ -133,7 +148,7 @@
     this.scene.add( light );
 
     // this.sun = new Asteroids.Sun();
-    var spacetex = THREE.ImageUtils.loadTexture("http://codelab.nfshost.com/asteroids_super_3d/space.jpg");
+    var spacetex = THREE.ImageUtils.loadTexture("http://codelab.nfshost.com/asteroids_super_3d/assets/space.jpg");
     var spacesphereGeo = new THREE.SphereGeometry(20000,20,20);
     var spacesphereMat = new THREE.MeshBasicMaterial({emissive: 0x111111, map: spacetex});
 
@@ -147,18 +162,6 @@
     spacesphere.container.className = "SpaceSphere"
 
     this.scene.add(spacesphere);
-
-    var radius = 400;
-
-    var imgTexture = THREE.ImageUtils.loadTexture( "sun.jpg" );
-    imgTexture.wrapS = imgTexture.wrapT = THREE.RepeatWrapping;
-    imgTexture.anisotropy = 16;
-
-    var shininess = 10, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
-
-    var material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, specular: specular, shininess: shininess, shading: shading, emissive: 0xFFFF99 });
-    var geometry = new THREE.SphereGeometry( radius, 32, 16 );
-    // var material = new THREE.MeshLambertMaterial( { color: '#FFCC33', emissive: 0xCCFF66 } );
 
     this.sun = new Asteroids.Sun()
 
@@ -222,7 +225,8 @@
       return ast;
     };
 
-    Game.prototype.addExplosion = function(object, still, rad){
+    Game.prototype.addExplosion = function(object, still, rad){	
+	  this.sounds["boom"].cloneNode(true).play();
       var posX = object.object.position.x;
       var posY = object.object.position.y;
       var posZ = object.object.position.z;

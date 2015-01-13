@@ -9,17 +9,17 @@
     var radius = 400;
     var options = {};
 
+    //simple solid color sun
+    // var material = new THREE.MeshLambertMaterial( { color: '#FFCC33', emissive: 0xCCFF66 } );
+
+    //lovely texture wrapped sun
     // var imgTexture = THREE.ImageUtils.loadTexture( "http://codelab.nfshost.com/asteroids_super_3d/sun.jpg" );
     // imgTexture.wrapS = imgTexture.wrapT = THREE.RepeatWrapping;
     // imgTexture.anisotropy = 16;
-
     // var shininess = 10, specular = 0x333333, bumpScale = 1, shading = THREE.SmoothShading;
     // options.material = new THREE.MeshPhongMaterial( { map: imgTexture, bumpMap: imgTexture, bumpScale: bumpScale, ambient: 0x101000, specular: specular, shininess: shininess, shading: shading, emissive: 0xFFFF99 });
     // options.geometry = new THREE.SphereGeometry( radius, 32, 16 );
-
-    // var material = new THREE.MeshLambertMaterial( { color: '#FFCC33', emissive: 0xCCFF66 } );
-
-    // this.object = new Asteroids.MovingObject({pos:[0,0,0], vel:[0,0,0], geometry: options.geometry, material: options.material, radius: radius});
+    
     this.radius = radius;
     this.mass = radius * radius;
     this.className = "sun";
@@ -33,14 +33,14 @@
         uniforms: { 
             // tExplosion: { type: "t", value: 0, texture: THREE.ImageUtils.loadTexture( 'explosion.png' ) },
             time: { type: "f", value: 0.0 },
-            weight: { type: "f", value: 50.0 }
+            weight: { type: "f", value: 200.0 }
         },
         vertexShader: document.getElementById( 'sunVertexShader' ).textContent,
         fragmentShader: document.getElementById( 'sunFragmentShader' ).textContent
         
     } );
     
-    options.geometry = new THREE.IcosahedronGeometry( 400, 4 );
+    options.geometry = new THREE.IcosahedronGeometry( 400, 5 );
 
     Asteroids.MovingObject.call(this, options);
 
@@ -60,7 +60,7 @@
     var glowUniforms = { 
             "c":   { type: "f", value: .2 },
             "p":   { type: "f", value: 3 },
-            glowColor: { type: "c", value: new THREE.Color(0xffdd00) },
+            glowColor: { type: "c", value: new THREE.Color(0xffee00) },
             viewVector: { type: "v3", value: window.g.camera.position },
             // amplitude: {
             //     type: 'f',
@@ -89,11 +89,11 @@
     // }
     // var glowGeometry = new THREE.SphereGeometry( radius, 64, 32 );
 
-    this.glow = new THREE.Mesh( options.geometry.clone(), glowMaterial );
+    this.glow = new THREE.Mesh( new THREE.SphereGeometry( radius*1.2, 32, 16 ), glowMaterial );
 
     this.glow.position = this.object.position;
     // this.glow.material.attributes.displacement.needsUpdate = true;
-    this.glow.scale.multiplyScalar(1.2);
+    // this.glow.scale.multiplyScalar(1.2);
     this.glow.container = this;
 
   };
@@ -102,10 +102,9 @@
 
   Sun.prototype.update = function(){
     this.object.material.uniforms[ 'time' ].value = .00005 * ( Date.now() - this.start );
-    // debugger;
+
     // this.uniforms.amplitude.value = 2 + 1 * Math.sin(this.timer);
  
-    // // debugger;
     // this.timer += 0.5;
     // if (this.timer > 2*Math.PI){
     //     this.timer = 0;
